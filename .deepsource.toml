@@ -1,6 +1,6 @@
 version = 1
 
-exclude_patterns = [".babelrc", "package.json", "yarn.lock"]
+exclude_patterns = [".babelrc", "yarn.lock"]
 
 [[analyzers]]
 name = "javascript"
