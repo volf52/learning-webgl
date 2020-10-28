@@ -1,0 +1,12 @@
+version = 1
+
+exclude_patterns = [".babelrc", "package.json", "yarn.lock"]
+
+[[analyzers]]
+name = "javascript"
+enabled = true
+
+[analyzers.meta]
+environment = ["browser"]
+style_guide = "standard"
+dialect = "typescript"
