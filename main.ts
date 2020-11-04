@@ -1,6 +1,4 @@
 const main = () => {
-  let r = 3;
-  r = "2";
   const canvas = document.querySelector<HTMLCanvasElement>("#glCanvas");
   const gl = canvas.getContext("webgl");
 
