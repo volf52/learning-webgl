@@ -1,8 +1,8 @@
-const main = () => {
+const main = (): void => {
   const canvas = document.querySelector<HTMLCanvasElement>("#glCanvas");
   const gl = canvas.getContext("webgl");
 
-  if (!gl) {
+  if (gl === null) {
     alert("Unable to initialize WebGL");
     return;
   }
