@@ -3586,6 +3586,11 @@ parcel-bundler@^1.12.4:
     v8-compile-cache "^2.0.0"
     ws "^5.1.1"
 
+parcel-plugin-shader-loader@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/parcel-plugin-shader-loader/-/parcel-plugin-shader-loader-1.0.0.tgz#800519bc33d1cf93771d413bcf6d63bc777afd83"
+  integrity sha512-2MBqA9uw9T6O0o6a+ULm2YYsEFgoDMnVB0eB9l4liDUQ5kEZBlInkYPhX1TZwT9tRYi5h2pIeVQoRBt08WgB9g==
+
 parse-asn1@^5.0.0, parse-asn1@^5.1.5:
   version "5.1.6"
   resolved "https://registry.yarnpkg.com/parse-asn1/-/parse-asn1-5.1.6.tgz#385080a3ec13cb62a62d39409cb3e88844cdaed4"

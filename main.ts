@@ -1,59 +1,40 @@
-const main = (): void => {
-  const canvas = document.querySelector<HTMLCanvasElement>("#glCanvas");
-  const gl = canvas.getContext("webgl");
+import * as utils from "./utils";
 
-  if (gl === null) {
-    alert("Unable to initialize WebGL");
+const main = (): void => {
+  const initResult = utils.initGL("#glCanvas");
+
+  if (!initResult) {
     return;
   }
 
+  const { gl } = initResult;
+
   // vertex data
-  const vertexData = [0, 1, 0, 1, -1, 0, -1, -1, 0];
+  const vertexData = [
+    [0.1, 0.1],
+    [-0.5, -0.5],
+    [-0.5, 0.5],
+    [0.5, -0.5],
+  ];
 
-  // create buffer
-  const buffer = gl.createBuffer();
-
-  // load vertex data into buffer
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexData), gl.STATIC_DRAW);
-
-  // create vertex shader
-  const vertexShader = gl.createShader(gl.VERTEX_SHADER);
-  gl.shaderSource(
-    vertexShader,
-    `
-  attribute vec3 position;
-  void main(){
-    gl_Position = vec4(position, 1); 
+  const program = utils.initProgram(gl);
+  if (!program) {
+    console.error("Failed to create GL program");
+    return;
   }
-`
-  );
-  gl.compileShader(vertexShader);
-  // create fragment shader
-  const fragShader = gl.createShader(gl.FRAGMENT_SHADER);
-  gl.shaderSource(
-    fragShader,
-    `
-void main(){
-  gl_FragColor = vec4(1, 0, 0, 1);
-}
-`
-  );
-  gl.compileShader(fragShader);
-  // attach shaders to program
-  const program = gl.createProgram();
-  gl.attachShader(program, vertexShader);
-  gl.attachShader(program, fragShader);
-  gl.linkProgram(program);
-
-  // enable vertex attribs
-  const posLoc = gl.getAttribLocation(program, `position`);
-  gl.enableVertexAttribArray(posLoc);
-  gl.vertexAttribPointer(posLoc, 3, gl.FLOAT, false, 0, 0);
   gl.useProgram(program);
 
+  // // create buffer
+  utils.loadData(gl, vertexData);
+
+  // // enable vertex attribs
+  const posLoc = gl.getAttribLocation(program, utils.POS_ATTRIB);
+  gl.enableVertexAttribArray(posLoc);
+  gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+
   // draw
-  gl.drawArrays(gl.TRIANGLES, 0, 3);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
 };
 
 window.onload = main;
