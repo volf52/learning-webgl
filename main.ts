@@ -43,24 +43,29 @@ const main = (): void => {
     matrix: gl.getUniformLocation(program, `matrix`),
   };
 
-  const matrix = Mat4.create().translate([0.2, 0.5, -2]);
-  // .scale([0.25, 0.25, 0.25]);
-
-  const projMatrix = Mat4.create().persepective(
+  const modelMatrix = Mat4.create();
+  const viewMatrix = Mat4.create();
+  const projMatrix = Mat4.create().perspective(
     (75 * Math.PI) / 180,
     canvas.width / canvas.height
   );
 
-  // Result of projMatrix * matrix
-  const finalMatrix = Mat4.create().get();
+  modelMatrix.translate([0.2, 0.5, -2])
+
+  viewMatrix.translate([-3, 0, 1])
+  viewMatrix.invert()
+
+
+  // Result of projMatrix * modelMatrix
+  const finalMatrix = Mat4.create();
 
   const animate = () => {
     requestAnimationFrame(animate);
-    matrix.rotateZ(Math.PI / 2 / 70);
-    matrix.rotateX(Math.PI / 2 / 70);
+    modelMatrix.rotateZ(Math.PI / 2 / 70);
+    modelMatrix.rotateX(Math.PI / 2 / 70);
 
-    projMatrix.mul(matrix, finalMatrix);
-    gl.uniformMatrix4fv(uniformLocations.matrix, false, finalMatrix);
+    projMatrix.mul(modelMatrix, finalMatrix); // better to send Mat4 in the finalMatrix part
+    gl.uniformMatrix4fv(uniformLocations.matrix, false, finalMatrix.get());
     gl.drawArrays(gl.TRIANGLES, 0, vertexData.length); // len / 3 for flattened array
   };
 

@@ -3,12 +3,18 @@ import { mat4, ReadonlyVec3 } from "gl-matrix";
 export class Mat4 {
   private mat: mat4;
 
-  private constructor() {
-    this.mat = mat4.create();
+  private constructor(m: mat4) {
+    this.mat = m;
   }
 
   public static create() {
-    return new Mat4();
+    return new Mat4(mat4.create());
+  }
+
+  public static from(mat: Mat4 | mat4) {
+    if (mat instanceof Mat4) return mat;
+
+    return new Mat4(mat);
   }
 
   get() {
@@ -54,30 +60,34 @@ export class Mat4 {
    * @param fovy Field of View in radians (vertical axis)
    * @param ar Aspect Ration Width / Height
    */
-  persepective(fovy: number, ar: number) {
+  perspective(fovy: number, ar: number) {
     mat4.perspective(this.mat, fovy, ar, 1e-4, 1e4);
     return this;
   }
 
-  mul(otherMatrix: Mat4 | mat4, out: Mat4 | mat4 | null) {
-    let result: mat4;
+  mul(otherMatrix: Mat4 | mat4, out: Mat4 | null) {
+    let result: Mat4;
 
     if (!out) {
-      result = mat4.create();
+      result = Mat4.create();
     } else {
-      result = this.getUnderlying(out);
+      result = out;
     }
 
     let om = this.getUnderlying(otherMatrix);
 
-    mat4.mul(result, this.mat, om);
+    mat4.mul(result.mat, this.mat, om);
 
     return result;
   }
 
   mulIP(otherMatrix: Mat4 | mat4) {
     mat4.mul(this.mat, this.mat, this.getUnderlying(otherMatrix));
+    return this;
+  }
 
+  invert() {
+    mat4.invert(this.mat, this.mat);
     return this;
   }
 
