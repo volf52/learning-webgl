@@ -17,12 +17,11 @@ const main = (): void => {
   // vertex data
   const vertexData = createCubeVertices(0.5);
 
-  const randomColor = () =>
-    [Math.random(), Math.random(), Math.random()] as Vec3;
+  const randomColor = (): Vec3 => [Math.random(), Math.random(), Math.random()];
 
   const colorData = [];
   for (let face = 0; face < 6; face++) {
-    let faceCol = randomColor();
+    const faceCol = randomColor();
     for (let vertex = 0; vertex < 6; vertex++) {
       colorData.push(faceCol);
     }
@@ -50,11 +49,10 @@ const main = (): void => {
     canvas.width / canvas.height
   );
 
-  modelMatrix.translate([0.2, 0.5, -2])
+  modelMatrix.translate([0.2, 0.5, -2]);
 
-  viewMatrix.translate([-3, 0, 1])
-  viewMatrix.invert()
-
+  viewMatrix.translate([-3, 0, 1]);
+  viewMatrix.invert();
 
   // Result of projMatrix * modelMatrix
   const finalMatrix = Mat4.create();

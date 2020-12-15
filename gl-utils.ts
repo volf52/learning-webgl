@@ -33,7 +33,11 @@ const FRAG_SHADER_SRC = `
   }
 `;
 
-const createShader = (gl: WebGLRenderingContext, type: GLenum, src: string) => {
+const createShader = (
+  gl: WebGLRenderingContext,
+  type: GLenum,
+  src: string
+): WebGLShader | null => {
   const shader = gl.createShader(type);
 
   if (!shader) return null;
@@ -48,13 +52,13 @@ export const initGL = (canvasID: string, clearColor = false) => {
   const canvas = document.getElementById(canvasID) as HTMLCanvasElement; // might be null
   if (!canvas) {
     console.error("HTML canvas not supported");
-    return;
+    return null;
   }
 
   const gl = canvas.getContext("webgl");
   if (!gl) {
     alert("Unable to initialize WebGL");
-    return;
+    return null;
   }
 
   // basic config
@@ -68,7 +72,7 @@ export const createGlProgram = (
   gl: WebGLRenderingContext,
   vShaderSrc = VERTEX_SHADER_SRC,
   fShaderSrc = FRAG_SHADER_SRC
-) => {
+): GLProgram | null => {
   const program = gl.createProgram();
   if (!program) return null;
 
@@ -105,29 +109,29 @@ class GLProgram {
     gl.linkProgram(program);
   }
 
-  loadData(data: DataArray) {
+  loadData(data: DataArray): WebGLBuffer | null {
     const { gl } = this;
 
     // Create buffer
     const buffer = gl.createBuffer();
-    const flat_array = data.flat(Infinity) as ArrayLike<number>;
+    const flatArray = data.flat(Infinity) as ArrayLike<number>;
 
     // Load data
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(
       gl.ARRAY_BUFFER,
-      Float32Array.from(flat_array),
+      Float32Array.from(flatArray),
       gl.STATIC_DRAW
     );
 
     return buffer;
   }
 
-  bindBuffer(buffer: WebGLBuffer | null) {
+  bindBuffer(buffer: WebGLBuffer | null): void {
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
   }
 
-  use(clear = true) {
+  use(clear = true): void {
     if (clear) this.gl.clear(this.gl.COLOR_BUFFER_BIT);
     this.gl.useProgram(this.program);
   }
@@ -144,7 +148,7 @@ class GLProgram {
     return location;
   }
 
-  attribPtr(loc: number, size: GLint) {
+  attribPtr(loc: number, size: GLint): void {
     this.gl.vertexAttribPointer(loc, size, this.gl.FLOAT, false, 0, 0);
   }
 
@@ -153,7 +157,7 @@ class GLProgram {
     buffer: WebGLBuffer | null,
     size: GLint,
     bind = false
-  ) {
+  ): void {
     const idx = this.getAndEnableAttrib(attrib, buffer, bind);
 
     this.attribPtr(idx, size);
