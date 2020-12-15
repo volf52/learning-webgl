@@ -11,7 +11,9 @@ const main = (): void => {
 
   // vertex data
   const vertexData = [
-    [0.1, 0.1],
+    [0.5, 0.5],
+    [-0.5, 0.5],
+    [0.5, -0.5],
     [-0.5, -0.5],
     [-0.5, 0.5],
     [0.5, -0.5],
@@ -34,7 +36,7 @@ const main = (): void => {
 
   // draw
   gl.clear(gl.COLOR_BUFFER_BIT);
-  gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+  gl.drawArrays(gl.LINES, 0, 6);
 };
 
 window.onload = main;
