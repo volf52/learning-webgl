@@ -2,18 +2,28 @@ export const POS_ATTRIB = "position";
 export const COLOR_ATTRIB = "color";
 
 const VERTEX_SHADER_SRC = `
-  attribute vec4 ${POS_ATTRIB};
+  precision mediump float;
+  
+  attribute vec3 ${POS_ATTRIB};
+  attribute vec3 ${COLOR_ATTRIB};
+  varying vec3 vColor;
 
-  void main(){
-    gl_Position=${POS_ATTRIB};
+  void main()
+  {
+    vColor = color;
+    gl_Position=vec4(${POS_ATTRIB}, 1);
   }
 `;
 
 const FRAG_SHADER_SRC = `
-precision mediump float;
-void main(){
-  gl_FragColor=vec4(1.0,1.0,1.0,1.0);
-}
+  precision mediump float;
+
+  varying vec3 vColor;
+  
+  void main()
+  {
+    gl_FragColor=vec4(vColor,1);
+  }
 `;
 
 type DataArray = Array<number | DataArray>;
@@ -34,7 +44,7 @@ export const initGL = (canvasID: string) => {
 
   // Basic Config
   gl.viewport(0, 0, canvas.width, canvas.height);
-  gl.clearColor(0, 0, 0, 1);
+  // gl.clearColor(0, 0, 0, 1);
 
   return { canvas, gl };
 };
@@ -42,17 +52,15 @@ export const initGL = (canvasID: string) => {
 export const loadData = (gl: WebGLRenderingContext, data: DataArray) => {
   // Create buffer
   const buffer = gl.createBuffer();
+  const flat_array = data.flat(Infinity) as ArrayLike<number>;
 
   // Load data
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.bufferData(
-    gl.ARRAY_BUFFER,
-    new Float32Array(data.flat(Infinity)),
-    gl.STATIC_DRAW,
-  );
+  gl.bufferData(gl.ARRAY_BUFFER, Float32Array.from(flat_array), gl.STATIC_DRAW);
 
   return buffer;
 };
+
 const createShader = (gl: WebGLRenderingContext, type: number, src: string) => {
   const shader = gl.createShader(type);
 
@@ -91,7 +99,7 @@ export const initProgram = (gl: WebGLRenderingContext) => {
 export const createProgram = (
   gl: WebGLRenderingContext,
   vShader: WebGLShader,
-  fShader: WebGLShader,
+  fShader: WebGLShader
 ) => {
   const program = gl.createProgram();
   if (!program) return program;
@@ -101,4 +109,17 @@ export const createProgram = (
   gl.linkProgram(program);
 
   return program;
+};
+
+export const enableAndBind = (
+  gl: WebGLRenderingContext,
+  program: WebGLProgram,
+  attrib: string,
+  buffer: WebGLBuffer | null
+) => {
+  const loc = gl.getAttribLocation(program, attrib);
+  gl.enableVertexAttribArray(loc);
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+
+  return loc;
 };

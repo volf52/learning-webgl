@@ -1,42 +1,50 @@
 import * as utils from "./utils";
+import GLProgram, { GlAttrib, createGlProgram, initGL } from "./glutils";
 
 const main = (): void => {
-  const initResult = utils.initGL("#glCanvas");
-
-  if (!initResult) {
-    return;
-  }
+  const initResult = initGL("glCanvas");
+  if (!initResult) return;
 
   const { gl } = initResult;
 
   // vertex data
   const vertexData = [
-    [0.5, 0.5],
-    [-0.5, 0.5],
-    [0.5, -0.5],
-    [-0.5, -0.5],
-    [-0.5, 0.5],
-    [0.5, -0.5],
+    [0, 1, 0], // v1.pos
+    [1, -1, 0], // v2.pos
+    [-1, -1, 0], // v3.pos
   ];
 
-  const program = utils.initProgram(gl);
-  if (!program) {
-    console.error("Failed to create GL program");
-    return;
-  }
-  gl.useProgram(program);
+  const colorData = [
+    [1, 0, 0], // v1.color
+    [0, 1, 0], // v2.color
+    [0, 0, 1], // v3.color
+  ];
 
-  // // create buffer
-  utils.loadData(gl, vertexData);
+  // create and load vertex and color buffer
+  const posBuffer = utils.loadData(gl, vertexData);
+  const colorBuffer = utils.loadData(gl, colorData);
 
-  // // enable vertex attribs
-  const posLoc = gl.getAttribLocation(program, utils.POS_ATTRIB);
-  gl.enableVertexAttribArray(posLoc);
-  gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+  console.log(posBuffer)
+
+  const program = utils.initProgram(initResult.gl);
+  if (!program) return;
+
+  // enable vertex attribs
+  const posLoc = utils.enableAndBind(gl, program, utils.POS_ATTRIB, posBuffer);
+  gl.vertexAttribPointer(posLoc, 3, gl.FLOAT, false, 0, 0);
+
+  const colorLoc = utils.enableAndBind(
+    gl,
+    program,
+    utils.COLOR_ATTRIB,
+    colorBuffer
+  );
+  gl.vertexAttribPointer(colorLoc, 3, gl.FLOAT, false, 0, 0);
 
   // draw
   gl.clear(gl.COLOR_BUFFER_BIT);
-  gl.drawArrays(gl.LINES, 0, 6);
+  gl.useProgram(program)
+  gl.drawArrays(gl.TRIANGLES, 0, 3);
 };
 
-window.onload = main;
+window.addEventListener("load", (_) => main());
