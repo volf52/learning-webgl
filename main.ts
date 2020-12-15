@@ -1,5 +1,5 @@
-import { createGlProgram, GlAttrib, initGL } from "./utils";
-import { mat4 } from "gl-matrix";
+import { createGlProgram, GlAttrib, initGL } from "./gl-utils";
+import { Mat4 } from "./mat-utils";
 
 const main = (): void => {
   const initResult = initGL("glCanvas");
@@ -40,14 +40,15 @@ const main = (): void => {
     matrix: gl.getUniformLocation(program, `matrix`),
   };
 
-  const matrix = mat4.create();
-  mat4.translate(matrix, matrix, [0.2, 0.5, 0]);
-  mat4.scale(matrix, matrix, [0.25, 0.25, 0.2]);
+  const matrix = Mat4.create()
+    .translate([0.2, 0.5, 0])
+    .scale([0.25, 0.25, 0.25]);
 
+  console.log(matrix.str());
   const animate = () => {
     requestAnimationFrame(animate);
-    mat4.rotateZ(matrix, matrix, Math.PI / 2 / 70);
-    gl.uniformMatrix4fv(uniformLocations.matrix, false, matrix);
+    matrix.rotateZ(Math.PI / 2 / 70);
+    gl.uniformMatrix4fv(uniformLocations.matrix, false, matrix.get());
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   };
 
