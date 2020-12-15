@@ -1,5 +1,5 @@
 import { createGlProgram, GlAttrib, initGL } from "./utils";
-import * as glm from "gl-matrix";
+import { mat4 } from "gl-matrix";
 
 const main = (): void => {
   const initResult = initGL("glCanvas");
@@ -9,9 +9,6 @@ const main = (): void => {
   if (!glProg) return;
 
   const { gl, program } = glProg;
-
-  const matrix = glm.mat4.create()
-  console.log(matrix);
 
   // vertex data
   const vertexData = [
@@ -37,9 +34,24 @@ const main = (): void => {
   const colorLoc = glProg.getAndEnableAttrib(GlAttrib.COLOR, colorBuffer, true);
   gl.vertexAttribPointer(colorLoc, 3, gl.FLOAT, false, 0, 0);
 
-  // draw
   glProg.use();
-  gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+  const uniformLocations = {
+    matrix: gl.getUniformLocation(program, `matrix`),
+  };
+
+  const matrix = mat4.create();
+  mat4.translate(matrix, matrix, [0.2, 0.5, 0]);
+  mat4.scale(matrix, matrix, [0.25, 0.25, 0.2]);
+
+  const animate = () => {
+    requestAnimationFrame(animate);
+    mat4.rotateZ(matrix, matrix, Math.PI / 2 / 70);
+    gl.uniformMatrix4fv(uniformLocations.matrix, false, matrix);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  };
+
+  animate();
 };
 
 window.addEventListener("load", (_) => main());

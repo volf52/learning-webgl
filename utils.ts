@@ -3,6 +3,7 @@ type DataArray = Array<number | DataArray>;
 export enum GlAttrib {
   POS = "position",
   COLOR = "color",
+  VAR_COLOR = "vColor",
 }
 
 const VERTEX_SHADER_SRC = `
@@ -10,23 +11,25 @@ const VERTEX_SHADER_SRC = `
   
   attribute vec3 ${GlAttrib.POS};
   attribute vec3 ${GlAttrib.COLOR};
-  varying vec3 vColor;
+  varying vec3 ${GlAttrib.VAR_COLOR};
+
+  uniform mat4 matrix;
 
   void main()
   {
     vColor = color;
-    gl_Position=vec4(${GlAttrib.POS}, 1);
+    gl_Position = matrix * vec4(${GlAttrib.POS}, 1);
   }
 `;
 
 const FRAG_SHADER_SRC = `
   precision mediump float;
   
-  varying vec3 vColor;
+  varying vec3 ${GlAttrib.VAR_COLOR};
   
   void main()
   {
-    gl_FragColor=vec4(vColor, 1);
+    gl_FragColor = vec4(${GlAttrib.VAR_COLOR}, 1);
   }
 `;
 
