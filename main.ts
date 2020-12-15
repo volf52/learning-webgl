@@ -12,18 +12,64 @@ const main = (): void => {
 
   // vertex data
   const vertexData = [
-    [0, 1, 0], // v1.pos
-    [1, -1, 0], // v2.pos
-    [-1, -1, 0], // v3.pos
+    // Front
+    [0.5, 0.5, 0.5],
+    [0.5, -0.5, 0.5],
+    [-0.5, 0.5, 0.5],
+    [-0.5, 0.5, 0.5],
+    [0.5, -0.5, 0.5],
+    [-0.5, -0.5, 0.5],
+
+    // Left
+    [-0.5, 0.5, 0.5],
+    [-0.5, -0.5, 0.5],
+    [-0.5, 0.5, -0.5],
+    [-0.5, 0.5, -0.5],
+    [-0.5, -0.5, 0.5],
+    [-0.5, -0.5, -0.5],
+
+    // Back
+    [-0.5, 0.5, -0.5],
+    [-0.5, -0.5, -0.5],
+    [0.5, 0.5, -0.5],
+    [0.5, 0.5, -0.5],
+    [-0.5, -0.5, -0.5],
+    [0.5, -0.5, -0.5],
+
+    // Right
+    [0.5, 0.5, -0.5],
+    [0.5, -0.5, -0.5],
+    [0.5, 0.5, 0.5],
+    [0.5, 0.5, 0.5],
+    [0.5, -0.5, 0.5],
+    [0.5, -0.5, -0.5],
+
+    // Top
+    [0.5, 0.5, 0.5],
+    [0.5, 0.5, -0.5],
+    [-0.5, 0.5, 0.5],
+    [-0.5, 0.5, 0.5],
+    [0.5, 0.5, -0.5],
+    [-0.5, 0.5, -0.5],
+
+    // Bottom
+    [0.5, -0.5, 0.5],
+    [0.5, -0.5, -0.5],
+    [-0.5, -0.5, 0.5],
+    [-0.5, -0.5, 0.5],
+    [0.5, -0.5, -0.5],
+    [-0.5, -0.5, -0.5],
   ];
 
   const randomColor = () => [Math.random(), Math.random(), Math.random()];
 
-  const colorData = [
-    randomColor(), // v1.color
-    randomColor(), // v2.color
-    randomColor(), // v3.color
-  ];
+  const colorData = [];
+  for (let face = 0; face < 6; face++) {
+    let faceCol = randomColor();
+    for (let vertex = 0; vertex < 6; vertex++) {
+      colorData.push(faceCol);
+    }
+  }
 
   // create and load vertex and color buffer
   const posBuffer = glProg.loadData(vertexData);
@@ -37,6 +83,7 @@ const main = (): void => {
   gl.vertexAttribPointer(colorLoc, 3, gl.FLOAT, false, 0, 0);
 
   glProg.use();
+  gl.enable(gl.DEPTH_TEST);
 
   const uniformLocations = {
     matrix: gl.getUniformLocation(program, `matrix`),
@@ -46,12 +93,12 @@ const main = (): void => {
     .translate([0.2, 0.5, 0])
     .scale([0.25, 0.25, 0.25]);
 
-  console.log(matrix.str());
   const animate = () => {
     requestAnimationFrame(animate);
     matrix.rotateZ(Math.PI / 2 / 70);
+    matrix.rotateX(Math.PI / 2 / 70);
     gl.uniformMatrix4fv(uniformLocations.matrix, false, matrix.get());
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    gl.drawArrays(gl.TRIANGLES, 0, vertexData.length); // len / 3 for flattened array
   };
 
   animate();
