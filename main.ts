@@ -10,6 +10,8 @@ const main = (): void => {
   const glProg = createGlProgram(initResult.gl);
   if (!glProg) return;
 
+  const { canvas } = initResult;
+
   const { gl, program } = glProg;
 
   // vertex data
@@ -41,15 +43,24 @@ const main = (): void => {
     matrix: gl.getUniformLocation(program, `matrix`),
   };
 
-  const matrix = Mat4.create()
-    .translate([0.2, 0.5, 0])
-    .scale([0.25, 0.25, 0.25]);
+  const matrix = Mat4.create().translate([0.2, 0.5, -2]);
+  // .scale([0.25, 0.25, 0.25]);
+
+  const projMatrix = Mat4.create().persepective(
+    (75 * Math.PI) / 180,
+    canvas.width / canvas.height
+  );
+
+  // Result of projMatrix * matrix
+  const finalMatrix = Mat4.create().get();
 
   const animate = () => {
     requestAnimationFrame(animate);
     matrix.rotateZ(Math.PI / 2 / 70);
     matrix.rotateX(Math.PI / 2 / 70);
-    gl.uniformMatrix4fv(uniformLocations.matrix, false, matrix.get());
+
+    projMatrix.mul(matrix, finalMatrix);
+    gl.uniformMatrix4fv(uniformLocations.matrix, false, finalMatrix);
     gl.drawArrays(gl.TRIANGLES, 0, vertexData.length); // len / 3 for flattened array
   };
 
