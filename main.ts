@@ -1,6 +1,7 @@
 import { createGlProgram, GlAttrib, initGL } from "./gl-utils";
 import { Mat4 } from "./mat-utils";
 import { createCubeVertices } from "./geometry";
+import { Vec3 } from "./types";
 
 const main = (): void => {
   const initResult = initGL("glCanvas");
@@ -14,7 +15,8 @@ const main = (): void => {
   // vertex data
   const vertexData = createCubeVertices(0.5);
 
-  const randomColor = () => [Math.random(), Math.random(), Math.random()];
+  const randomColor = () =>
+    [Math.random(), Math.random(), Math.random()] as Vec3;
 
   const colorData = [];
   for (let face = 0; face < 6; face++) {
@@ -28,12 +30,9 @@ const main = (): void => {
   const posBuffer = glProg.loadData(vertexData);
   const colorBuffer = glProg.loadData(colorData);
 
-  // enable vertex attribs
-  const posLoc = glProg.getAndEnableAttrib(GlAttrib.POS, posBuffer, true);
-  gl.vertexAttribPointer(posLoc, 3, gl.FLOAT, false, 0, 0);
-
-  const colorLoc = glProg.getAndEnableAttrib(GlAttrib.COLOR, colorBuffer, true);
-  gl.vertexAttribPointer(colorLoc, 3, gl.FLOAT, false, 0, 0);
+  // enable vertex and color attribs
+  glProg.setVAttrib(GlAttrib.POS, posBuffer, 3, true);
+  glProg.setVAttrib(GlAttrib.COLOR, colorBuffer, 3, true);
 
   glProg.use();
   gl.enable(gl.DEPTH_TEST);

@@ -1,4 +1,4 @@
-type DataArray = Array<number | DataArray>;
+import { DataArray } from "./types";
 
 export enum GlAttrib {
   POS = "position",
@@ -106,7 +106,7 @@ class GLProgram {
     gl.linkProgram(program);
   }
 
-  loadData = (data: DataArray) => {
+  loadData(data: DataArray) {
     const { gl } = this;
 
     // Create buffer
@@ -122,28 +122,41 @@ class GLProgram {
     );
 
     return buffer;
-  };
+  }
 
-  getAndEnableAttrib = (
-    attrib: GlAttrib,
-    buffer: WebGLBuffer | null,
-    enable = false
-  ) => {
-    const location = this.gl.getAttribLocation(this.program, attrib);
-    this.gl.enableVertexAttribArray(location);
-    if (enable) this.bindBuffer(buffer);
-
-    return location;
-  };
-
-  bindBuffer = (buffer: WebGLBuffer | null) => {
+  bindBuffer(buffer: WebGLBuffer | null) {
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
-  };
+  }
 
-  use = (clear = true) => {
+  use(clear = true) {
     if (clear) this.gl.clear(this.gl.COLOR_BUFFER_BIT);
     this.gl.useProgram(this.program);
-  };
-}
+  }
 
-export default GLProgram;
+  getAndEnableAttrib(
+    attrib: GlAttrib,
+    buffer: WebGLBuffer | null,
+    bind = false
+  ): GLint {
+    const location = this.gl.getAttribLocation(this.program, attrib);
+    this.gl.enableVertexAttribArray(location);
+    if (bind) this.bindBuffer(buffer);
+
+    return location;
+  }
+
+  attribPtr(loc: number, size: GLint) {
+    this.gl.vertexAttribPointer(loc, size, this.gl.FLOAT, false, 0, 0);
+  }
+
+  setVAttrib(
+    attrib: GlAttrib,
+    buffer: WebGLBuffer | null,
+    size: GLint,
+    bind = false
+  ) {
+    const idx = this.getAndEnableAttrib(attrib, buffer, bind);
+
+    this.attribPtr(idx, size);
+  }
+}

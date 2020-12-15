@@ -1,5 +1,7 @@
-export const createCubeVertices = (s: number) => {
-  const data = [
+import { DataArray } from "./types";
+
+export const createCubeVertices = (s: number): DataArray => {
+  return [
     // Front
     [s, s, s],
     [s, -s, s],
@@ -47,7 +49,5 @@ export const createCubeVertices = (s: number) => {
     [-s, -s, s],
     [s, -s, -s],
     [-s, -s, -s],
-  ];
-
-  return data;
+  ] as DataArray;
 };
