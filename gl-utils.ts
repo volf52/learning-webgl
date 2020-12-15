@@ -71,7 +71,6 @@ export const createGlProgram = (
 ) => {
   const program = gl.createProgram();
   if (!program) return null;
-  gl.useProgram(program);
 
   const vertexShader = createShader(gl, gl.VERTEX_SHADER, vShaderSrc);
   if (!vertexShader) {

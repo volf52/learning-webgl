@@ -49,7 +49,44 @@ export class Mat4 {
     return this;
   }
 
+  /**
+   *
+   * @param fovy Field of View in radians (vertical axis)
+   * @param ar Aspect Ration Width / Height
+   */
+  persepective(fovy: number, ar: number) {
+    mat4.perspective(this.mat, fovy, ar, 1e-4, 1e4);
+    return this;
+  }
+
+  mul(otherMatrix: Mat4 | mat4, out: Mat4 | mat4 | null) {
+    let result: mat4;
+
+    if (!out) {
+      result = mat4.create();
+    } else {
+      result = this.getUnderlying(out);
+    }
+
+    let om = this.getUnderlying(otherMatrix);
+
+    mat4.mul(result, this.mat, om);
+
+    return result;
+  }
+
+  mulIP(otherMatrix: Mat4 | mat4) {
+    mat4.mul(this.mat, this.mat, this.getUnderlying(otherMatrix));
+
+    return this;
+  }
+
   str() {
     return mat4.str(this.mat);
+  }
+
+  private getUnderlying(m: Mat4 | mat4) {
+    if (m instanceof Mat4) return m.get();
+    else return m;
   }
 }
