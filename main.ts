@@ -17,10 +17,12 @@ const main = (): void => {
     [-1, -1, 0], // v3.pos
   ];
 
+  const randomColor = () => [Math.random(), Math.random(), Math.random()];
+
   const colorData = [
-    [1, 0, 0], // v1.color
-    [0, 1, 0], // v2.color
-    [0, 0, 1], // v3.color
+    randomColor(), // v1.color
+    randomColor(), // v2.color
+    randomColor(), // v3.color
   ];
 
   // create and load vertex and color buffer
