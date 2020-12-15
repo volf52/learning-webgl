@@ -1,4 +1,5 @@
 import { createGlProgram, GlAttrib, initGL } from "./utils";
+import * as glm from "gl-matrix";
 
 const main = (): void => {
   const initResult = initGL("glCanvas");
@@ -8,6 +9,9 @@ const main = (): void => {
   if (!glProg) return;
 
   const { gl, program } = glProg;
+
+  const matrix = glm.mat4.create()
+  console.log(matrix);
 
   // vertex data
   const vertexData = [
