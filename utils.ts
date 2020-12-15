@@ -1,36 +1,48 @@
-export const POS_ATTRIB = "position";
-export const COLOR_ATTRIB = "color";
+type DataArray = Array<number | DataArray>;
+
+export enum GlAttrib {
+  POS = "position",
+  COLOR = "color",
+}
 
 const VERTEX_SHADER_SRC = `
   precision mediump float;
   
-  attribute vec3 ${POS_ATTRIB};
-  attribute vec3 ${COLOR_ATTRIB};
+  attribute vec3 ${GlAttrib.POS};
+  attribute vec3 ${GlAttrib.COLOR};
   varying vec3 vColor;
 
   void main()
   {
     vColor = color;
-    gl_Position=vec4(${POS_ATTRIB}, 1);
+    gl_Position=vec4(${GlAttrib.POS}, 1);
   }
 `;
 
 const FRAG_SHADER_SRC = `
   precision mediump float;
-
+  
   varying vec3 vColor;
   
   void main()
   {
-    gl_FragColor=vec4(vColor,1);
+    gl_FragColor=vec4(vColor, 1);
   }
 `;
 
-type DataArray = Array<number | DataArray>;
+const createShader = (gl: WebGLRenderingContext, type: GLenum, src: string) => {
+  const shader = gl.createShader(type);
 
-export const initGL = (canvasID: string) => {
-  const canvas = document.querySelector<HTMLCanvasElement>(canvasID);
+  if (!shader) return null;
 
+  gl.shaderSource(shader, src);
+  gl.compileShader(shader);
+
+  return shader;
+};
+
+export const initGL = (canvasID: string, clearColor = false) => {
+  const canvas = document.getElementById(canvasID) as HTMLCanvasElement; // might be null
   if (!canvas) {
     console.error("HTML canvas not supported");
     return;
@@ -42,84 +54,93 @@ export const initGL = (canvasID: string) => {
     return;
   }
 
-  // Basic Config
+  // basic config
   gl.viewport(0, 0, canvas.width, canvas.height);
-  // gl.clearColor(0, 0, 0, 1);
+  if (clearColor) gl.clearColor(0, 0, 0, 1);
 
   return { canvas, gl };
 };
 
-export const loadData = (gl: WebGLRenderingContext, data: DataArray) => {
-  // Create buffer
-  const buffer = gl.createBuffer();
-  const flat_array = data.flat(Infinity) as ArrayLike<number>;
+export const createGlProgram = (
+  gl: WebGLRenderingContext,
+  vShaderSrc = VERTEX_SHADER_SRC,
+  fShaderSrc = FRAG_SHADER_SRC
+) => {
+  const program = gl.createProgram();
+  if (!program) return null;
+  gl.useProgram(program);
 
-  // Load data
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, Float32Array.from(flat_array), gl.STATIC_DRAW);
-
-  return buffer;
-};
-
-const createShader = (gl: WebGLRenderingContext, type: number, src: string) => {
-  const shader = gl.createShader(type);
-
-  if (!shader) return null;
-
-  gl.shaderSource(shader, src);
-  gl.compileShader(shader);
-
-  return shader;
-};
-
-export const createVertexShader = (gl: WebGLRenderingContext) =>
-  createShader(gl, gl.VERTEX_SHADER, VERTEX_SHADER_SRC);
-
-export const createFragmentShader = (gl: WebGLRenderingContext) =>
-  createShader(gl, gl.FRAGMENT_SHADER, FRAG_SHADER_SRC);
-
-export const initProgram = (gl: WebGLRenderingContext) => {
-  // create vertex shader
-  const vertexShader = createVertexShader(gl);
+  const vertexShader = createShader(gl, gl.VERTEX_SHADER, vShaderSrc);
   if (!vertexShader) {
     console.error("Failed to create vertex shader");
     return null;
   }
 
-  // create fragment shader
-  const fragShader = createFragmentShader(gl);
+  const fragShader = createShader(gl, gl.FRAGMENT_SHADER, fShaderSrc);
   if (!fragShader) {
     console.error("Failed to create fragment shader");
     return null;
   }
 
-  return createProgram(gl, vertexShader, fragShader);
+  return new GLProgram(gl, program, vertexShader, fragShader);
 };
 
-export const createProgram = (
-  gl: WebGLRenderingContext,
-  vShader: WebGLShader,
-  fShader: WebGLShader
-) => {
-  const program = gl.createProgram();
-  if (!program) return program;
+class GLProgram {
+  gl: WebGLRenderingContext;
+  program: WebGLProgram;
 
-  gl.attachShader(program, vShader);
-  gl.attachShader(program, fShader);
-  gl.linkProgram(program);
+  constructor(
+    gl: WebGLRenderingContext,
+    program: WebGLProgram,
+    vShader: WebGLShader,
+    fShader: WebGLShader
+  ) {
+    this.gl = gl;
+    this.program = program;
 
-  return program;
-};
+    gl.attachShader(program, vShader);
+    gl.attachShader(program, fShader);
+    gl.linkProgram(program);
+  }
 
-export const enableAndBind = (
-  gl: WebGLRenderingContext,
-  program: WebGLProgram,
-  attrib: string,
-  buffer: WebGLBuffer | null
-) => {
-  const loc = gl.getAttribLocation(program, attrib);
-  gl.enableVertexAttribArray(loc);
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  loadData = (data: DataArray) => {
+    const { gl } = this;
 
-  return loc;
-};
+    // Create buffer
+    const buffer = gl.createBuffer();
+    const flat_array = data.flat(Infinity) as ArrayLike<number>;
+
+    // Load data
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(
+      gl.ARRAY_BUFFER,
+      Float32Array.from(flat_array),
+      gl.STATIC_DRAW
+    );
+
+    return buffer;
+  };
+
+  getAndEnableAttrib = (
+    attrib: GlAttrib,
+    buffer: WebGLBuffer | null,
+    enable = false
+  ) => {
+    const location = this.gl.getAttribLocation(this.program, attrib);
+    this.gl.enableVertexAttribArray(location);
+    if (enable) this.bindBuffer(buffer);
+
+    return location;
+  };
+
+  bindBuffer = (buffer: WebGLBuffer | null) => {
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
+  };
+
+  use = (clear = true) => {
+    if (clear) this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+    this.gl.useProgram(this.program);
+  };
+}
+
+export default GLProgram;

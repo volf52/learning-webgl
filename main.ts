@@ -1,11 +1,13 @@
-import * as utils from "./utils";
-import GLProgram, { GlAttrib, createGlProgram, initGL } from "./glutils";
+import { createGlProgram, GlAttrib, initGL } from "./utils";
 
 const main = (): void => {
   const initResult = initGL("glCanvas");
   if (!initResult) return;
 
-  const { gl } = initResult;
+  const glProg = createGlProgram(initResult.gl);
+  if (!glProg) return;
+
+  const { gl, program } = glProg;
 
   // vertex data
   const vertexData = [
@@ -21,29 +23,18 @@ const main = (): void => {
   ];
 
   // create and load vertex and color buffer
-  const posBuffer = utils.loadData(gl, vertexData);
-  const colorBuffer = utils.loadData(gl, colorData);
-
-  console.log(posBuffer)
-
-  const program = utils.initProgram(initResult.gl);
-  if (!program) return;
+  const posBuffer = glProg.loadData(vertexData);
+  const colorBuffer = glProg.loadData(colorData);
 
   // enable vertex attribs
-  const posLoc = utils.enableAndBind(gl, program, utils.POS_ATTRIB, posBuffer);
+  const posLoc = glProg.getAndEnableAttrib(GlAttrib.POS, posBuffer, true);
   gl.vertexAttribPointer(posLoc, 3, gl.FLOAT, false, 0, 0);
 
-  const colorLoc = utils.enableAndBind(
-    gl,
-    program,
-    utils.COLOR_ATTRIB,
-    colorBuffer
-  );
+  const colorLoc = glProg.getAndEnableAttrib(GlAttrib.COLOR, colorBuffer, true);
   gl.vertexAttribPointer(colorLoc, 3, gl.FLOAT, false, 0, 0);
 
   // draw
-  gl.clear(gl.COLOR_BUFFER_BIT);
-  gl.useProgram(program)
+  glProg.use();
   gl.drawArrays(gl.TRIANGLES, 0, 3);
 };
 
