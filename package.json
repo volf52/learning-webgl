@@ -7,7 +7,7 @@
   "author": "Arslan <rslnkrmt2552@gmail.com>",
   "scripts": {
     "build": "parcel build index.html",
-    "dev": "parcel index.html --open",
+    "dev": "parcel serve index.html --open --no-cache",
     "start": "npm run build && npm run dev",
     "clean": "rm -r .cache && rm -r dist"
   },
