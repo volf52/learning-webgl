@@ -65,16 +65,16 @@ export class Mat4 {
     return this;
   }
 
-  mul(otherMatrix: Mat4 | mat4, out: Mat4 | null): Mat4 {
+  mul(otherMatrix: Mat4 | mat4, out?: Mat4): Mat4 {
     let result: Mat4;
 
-    if (!out) {
+    if (out === undefined || out === null) {
       result = Mat4.create();
     } else {
       result = out;
     }
 
-    mat4.mul(result.mat, this.mat, this.getUnderlying(otherMatrix));
+    mat4.multiply(result.mat, this.mat, this.getUnderlying(otherMatrix));
 
     return result;
   }
@@ -91,6 +91,12 @@ export class Mat4 {
 
   str(): string {
     return mat4.str(this.mat);
+  }
+
+  log(): Mat4 {
+    console.log(mat4.str(this.mat));
+
+    return this;
   }
 
   private getUnderlying(m: Mat4 | mat4): mat4 {

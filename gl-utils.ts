@@ -33,6 +33,32 @@ const FRAG_SHADER_SRC = `
   }
 `;
 
+export const initGL = (
+  canvasID: string,
+  clearColor = false
+): { canvas: HTMLCanvasElement; gl: WebGLRenderingContext } | null => {
+  const canvas = document.getElementById(canvasID) as HTMLCanvasElement; // might be null
+  if (canvas === null) {
+    console.error("HTML canvas not supported");
+    return null;
+  }
+
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const gl = canvas.getContext("webgl");
+  if (gl === null) {
+    alert("Unable to initialize WebGL");
+    return null;
+  }
+
+  // basic config
+  gl.viewport(0, 0, canvas.width, canvas.height);
+  if (clearColor) gl.clearColor(0, 0, 0, 1);
+
+  return { canvas, gl };
+};
+
 const createShader = (
   gl: WebGLRenderingContext,
   type: GLenum,
@@ -48,51 +74,68 @@ const createShader = (
   return shader;
 };
 
-export const initGL = (
-  canvasID: string,
-  clearColor = false
-): { canvas: HTMLCanvasElement; gl: WebGLRenderingContext } | null => {
-  const canvas = document.getElementById(canvasID) as HTMLCanvasElement; // might be null
-  if (canvas === null) {
-    console.error("HTML canvas not supported");
-    return null;
+export class GlWrapper {
+  private readonly gl: WebGLRenderingContext;
+
+  constructor(gl: WebGLRenderingContext) {
+    this.gl = gl;
   }
 
-  const gl = canvas.getContext("webgl");
-  if (gl === null) {
-    alert("Unable to initialize WebGL");
-    return null;
+  loadData(data: DataArray): WebGLBuffer | null {
+    const { gl } = this;
+
+    // Create buffer
+    const buffer = gl.createBuffer();
+    const flatArray = data.flat(1);
+
+    // Load data
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(
+      gl.ARRAY_BUFFER,
+      Float32Array.from(flatArray),
+      gl.STATIC_DRAW
+    );
+
+    return buffer;
   }
 
-  // basic config
-  gl.viewport(0, 0, canvas.width, canvas.height);
-  if (clearColor) gl.clearColor(0, 0, 0, 1);
-
-  return { canvas, gl };
-};
-
-export const createGlProgram = (
-  gl: WebGLRenderingContext,
-  vShaderSrc = VERTEX_SHADER_SRC,
-  fShaderSrc = FRAG_SHADER_SRC
-): GLProgram | null => {
-  const program = gl.createProgram();
-  if (program === null) return null;
-
-  const vertexShader = createShader(gl, gl.VERTEX_SHADER, vShaderSrc);
-  if (vertexShader === null) {
-    console.error("Failed to create vertex shader");
-    return null;
+  bindBuffer(buffer: WebGLBuffer | null): void {
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
   }
 
-  const fragShader = createShader(gl, gl.FRAGMENT_SHADER, fShaderSrc);
-  if (fragShader === null) {
-    console.error("Failed to create fragment shader");
-    return null;
-  }
+  createShaders = (
+    vShaderSrc = VERTEX_SHADER_SRC,
+    fShaderSrc = FRAG_SHADER_SRC
+  ): { vShader: WebGLShader; fShader: WebGLShader } | null => {
+    const { gl } = this;
+    const vertexShader = createShader(gl, gl.VERTEX_SHADER, vShaderSrc);
+    if (vertexShader === null) {
+      console.error("Failed to create vertex shader");
+      return null;
+    }
 
-  return new GLProgram(gl, program, vertexShader, fragShader);
-};
+    const fragShader = createShader(gl, gl.FRAGMENT_SHADER, fShaderSrc);
+    if (fragShader === null) {
+      console.error("Failed to create fragment shader");
+      return null;
+    }
+
+    return {
+      vShader: vertexShader,
+      fShader: fragShader,
+    };
+  };
+
+  createGlProgram(
+    vShader: WebGLShader,
+    fShader: WebGLShader
+  ): GLProgram | null {
+    const program = this.gl.createProgram();
+    if (program === null) return null;
+
+    return new GLProgram(this.gl, program, vShader, fShader);
+  }
+}
 
 class GLProgram {
   gl: WebGLRenderingContext;
@@ -112,28 +155,6 @@ class GLProgram {
     gl.linkProgram(program);
   }
 
-  loadData(data: DataArray): WebGLBuffer | null {
-    const { gl } = this;
-
-    // Create buffer
-    const buffer = gl.createBuffer();
-    const flatArray = data.flat(Infinity) as ArrayLike<number>;
-
-    // Load data
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      Float32Array.from(flatArray),
-      gl.STATIC_DRAW
-    );
-
-    return buffer;
-  }
-
-  bindBuffer(buffer: WebGLBuffer | null): void {
-    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
-  }
-
   use(clear = true): void {
     if (clear) this.gl.clear(this.gl.COLOR_BUFFER_BIT);
     this.gl.useProgram(this.program);
@@ -146,7 +167,7 @@ class GLProgram {
   ): GLint {
     const location = this.gl.getAttribLocation(this.program, attrib);
     this.gl.enableVertexAttribArray(location);
-    if (bind) this.bindBuffer(buffer);
+    if (bind) this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
 
     return location;
   }
