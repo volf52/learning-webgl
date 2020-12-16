@@ -1,7 +1,6 @@
 import { GlAttrib, GlWrapper, initGL } from "./gl-utils";
 import { Mat4 } from "./mat-utils";
-import { createCubeVertices } from "./geometry";
-import { randomColorVec } from "./utils";
+import { spherePointCloud } from "./utils";
 
 const main = (): void => {
   const initResult = initGL("glCanvas");
@@ -12,19 +11,10 @@ const main = (): void => {
   const { canvas } = initResult;
 
   // vertex data
-  const vertexData = createCubeVertices(1);
+  const vertexData = spherePointCloud();
 
-  // const colorData = [];
-  // for (let face = 0; face < 6; face++) {
-  //   const faceCol = randomColorVec();
-  //   for (let vertex = 0; vertex < 6; vertex++) {
-  //     colorData.push(faceCol);
-  //   }
-  // }
-
-  // create and load vertex and color buffer
+  // create and load vertex data to GPU buffer
   const posBuffer = glw.loadData(vertexData);
-  // const colorBuffer = glw.loadData(colorData);
 
   const shaders = glw.initShaders({
     vShaderSrc: `
@@ -51,7 +41,6 @@ const main = (): void => {
 
   // enable vertex and color attribs
   glProg.setVAttrib(GlAttrib.POS, posBuffer, 3, true);
-  // glProg.setVAttrib(GlAttrib.COLOR, colorBuffer, 3, true);
 
   glProg.use();
   gl.enable(gl.DEPTH_TEST);
@@ -78,7 +67,7 @@ const main = (): void => {
 
     gl.uniformMatrix4fv(uniformLocations.matrix, false, mvpMatrix.get());
 
-    gl.drawArrays(gl.TRIANGLES, 0, vertexData.length); // len / 3 for flattened array
+    gl.drawArrays(gl.POINTS, 0, vertexData.length); // len / 3 for flattened array
   };
 
   animate();
