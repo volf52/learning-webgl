@@ -40,7 +40,7 @@ const createShader = (
 ): WebGLShader | null => {
   const shader = gl.createShader(type);
 
-  if (!shader) return null;
+  if (shader === null) return null;
 
   gl.shaderSource(shader, src);
   gl.compileShader(shader);
@@ -48,15 +48,18 @@ const createShader = (
   return shader;
 };
 
-export const initGL = (canvasID: string, clearColor = false) => {
+export const initGL = (
+  canvasID: string,
+  clearColor = false
+): { canvas: HTMLCanvasElement; gl: WebGLRenderingContext } | null => {
   const canvas = document.getElementById(canvasID) as HTMLCanvasElement; // might be null
-  if (!canvas) {
+  if (canvas === null) {
     console.error("HTML canvas not supported");
     return null;
   }
 
   const gl = canvas.getContext("webgl");
-  if (!gl) {
+  if (gl === null) {
     alert("Unable to initialize WebGL");
     return null;
   }
@@ -74,16 +77,16 @@ export const createGlProgram = (
   fShaderSrc = FRAG_SHADER_SRC
 ): GLProgram | null => {
   const program = gl.createProgram();
-  if (!program) return null;
+  if (program === null) return null;
 
   const vertexShader = createShader(gl, gl.VERTEX_SHADER, vShaderSrc);
-  if (!vertexShader) {
+  if (vertexShader === null) {
     console.error("Failed to create vertex shader");
     return null;
   }
 
   const fragShader = createShader(gl, gl.FRAGMENT_SHADER, fShaderSrc);
-  if (!fragShader) {
+  if (fragShader === null) {
     console.error("Failed to create fragment shader");
     return null;
   }

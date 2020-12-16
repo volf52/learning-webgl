@@ -1,14 +1,14 @@
 import { createGlProgram, GlAttrib, initGL } from "./gl-utils";
 import { Mat4 } from "./mat-utils";
 import { createCubeVertices } from "./geometry";
-import { Vec3 } from "./types";
+import { randomColorVec } from "./utils";
 
 const main = (): void => {
   const initResult = initGL("glCanvas");
-  if (!initResult) return;
+  if (initResult === null) return;
 
   const glProg = createGlProgram(initResult.gl);
-  if (!glProg) return;
+  if (glProg === null) return;
 
   const { canvas } = initResult;
 
@@ -17,11 +17,9 @@ const main = (): void => {
   // vertex data
   const vertexData = createCubeVertices(0.5);
 
-  const randomColor = (): Vec3 => [Math.random(), Math.random(), Math.random()];
-
   const colorData = [];
   for (let face = 0; face < 6; face++) {
-    const faceCol = randomColor();
+    const faceCol = randomColorVec();
     for (let vertex = 0; vertex < 6; vertex++) {
       colorData.push(faceCol);
     }
@@ -57,7 +55,7 @@ const main = (): void => {
   // Result of projMatrix * modelMatrix
   const finalMatrix = Mat4.create();
 
-  const animate = () => {
+  const animate = (): void => {
     requestAnimationFrame(animate);
     modelMatrix.rotateZ(Math.PI / 2 / 70);
     modelMatrix.rotateX(Math.PI / 2 / 70);
