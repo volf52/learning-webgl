@@ -1,14 +1,6 @@
-import { DataArray } from "./types";
+import { DataArray, GlAttrib } from "./types";
+import { Mat4 } from "./mat-utils";
 
-export enum GlAttrib {
-  POS = "vertex_position",
-  COLOR = "color",
-  VAR_COLOR = "v_color",
-  M_MAT = "u_model_matrix",
-  V_MAT = "u_view_matrix",
-  P_MAT = "u_projection_matrix",
-  FRAG_POS = "v_frag_pos",
-}
 
 const DEFAULT_VSHADER_SRC = `
   precision mediump float;
@@ -49,6 +41,12 @@ type InitProgResult = {
   glProg: GLProgram;
 };
 
+export type UniformLocations = {
+  model_matrix: WebGLUniformLocation | null;
+  view_matrix: WebGLUniformLocation | null;
+  projection_matrix: WebGLUniformLocation | null;
+};
+
 export const initProg = (
   canvasID: string,
   shaderSources: InitShaderParams = {}
@@ -73,7 +71,7 @@ export const initProg = (
 
   // GL Config
   // gl.clearColor(0, 0, 0, 1)
-  gl.viewport(0, 0, canvas.width, canvas.height);
+  // gl.viewport(0, 0, canvas.width, canvas.height);
 
   const glw = new GlWrapper(gl);
   const shaders = glw.initShaders(shaderSources);
@@ -164,6 +162,18 @@ export class GlWrapper {
     }
     return new GLProgram(this.gl, program, vShader, fShader);
   }
+
+  uniformMat(loc: WebGLUniformLocation | null, mat: Mat4) {
+    this.gl.uniformMatrix4fv(loc, false, mat.get());
+  }
+
+  drawTriangles(len: number, first = 0) {
+    this.gl.drawArrays(this.gl.TRIANGLES, first, len);
+  }
+
+  drawPoints(len: number, first = 0) {
+    this.gl.drawArrays(this.gl.POINTS, first, len);
+  }
 }
 
 class GLProgram {
@@ -182,6 +192,10 @@ class GLProgram {
     gl.attachShader(program, vShader);
     gl.attachShader(program, fShader);
     gl.linkProgram(program);
+
+    if(!gl.getProgramParameter(program, gl.LINK_STATUS)){
+      console.error(`(WebGL shader program) ${gl.getProgramInfoLog(program)}`)
+    }
   }
 
   use(clear = true): void {
@@ -195,6 +209,9 @@ class GLProgram {
     bind = false
   ): GLint {
     const location = this.gl.getAttribLocation(this.program, attrib);
+    if(location < 0){
+      console.log(`Attrib: ${attrib}\tIndex: ${location}`)
+    }
     this.gl.enableVertexAttribArray(location);
     if (bind) this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
 
