@@ -1,8 +1,7 @@
-import { GlAttrib, initGL, GlWrapper } from "./gl-utils";
+import { GlAttrib, GlWrapper, initGL } from "./gl-utils";
 import { Mat4 } from "./mat-utils";
 import { createCubeVertices } from "./geometry";
 import { randomColorVec } from "./utils";
-import { mat4 } from "gl-matrix";
 
 const main = (): void => {
   const initResult = initGL("glCanvas");
@@ -13,7 +12,7 @@ const main = (): void => {
   const { canvas } = initResult;
 
   // vertex data
-  const vertexData = createCubeVertices(0.5);
+  const vertexData = createCubeVertices(1);
 
   const colorData = [];
   for (let face = 0; face < 6; face++) {
