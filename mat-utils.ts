@@ -79,7 +79,7 @@ export class Mat4 {
     return result;
   }
 
-  mulIP(otherMatrix: Mat4 | mat4): Mat4 {
+  mulp(otherMatrix: Mat4 | mat4): Mat4 {
     mat4.mul(this.mat, this.mat, this.getUnderlying(otherMatrix));
     return this;
   }
