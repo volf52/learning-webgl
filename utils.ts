@@ -1,10 +1,20 @@
 import { Vec3, DataArray } from "./types";
+import { vec3 } from "gl-matrix";
 
 export const randomColorVec = (): Vec3 => [
   Math.random(),
   Math.random(),
   Math.random(),
 ];
+
+// Normalize to make the distance from origin = 1
+const normalize = (v: Vec3): Vec3 => {
+  const [x, y, z] = v;
+  let len = x * x + y * y + z * z;
+  if (len > 0) len = 1 / Math.sqrt(len);
+
+  return [x * len, y * len, z * len];
+};
 
 /**
  *
@@ -14,8 +24,11 @@ const randomPoint = (): number => Math.random() - 0.5;
 export const spherePointCloud = (num = 100_000): DataArray => {
   let points: DataArray = [];
   for (let i = 0; i < num; i++) {
-    points.push([randomPoint(), randomPoint(), randomPoint()]);
+    const point: vec3 = [randomPoint(), randomPoint(), randomPoint()];
+
+    points.push(normalize(point));
   }
+
   return points;
 };
 
