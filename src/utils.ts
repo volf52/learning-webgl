@@ -16,11 +16,16 @@ const normalize = (v: Vec3): Vec3 => {
   return [x * len, y * len, z * len];
 };
 
+const RAD_PER_DEG = Math.PI / 180;
+export const toRadians = (deg: number): number => {
+  return deg * RAD_PER_DEG;
+};
+
 /**
  *
  * @return {number} a random number between -0.5 and 0.5
  */
-const randomPoint = (): number => Math.random() - 0.5;
+const randomPoint = (): number => Math.random() * 2 - 1;
 export const spherePointCloud = (num = 100_000): DataArray => {
   let points: DataArray = [];
   for (let i = 0; i < num; i++) {

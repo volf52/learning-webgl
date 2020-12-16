@@ -1,29 +1,32 @@
 import { DataArray } from "./types";
 
 export enum GlAttrib {
-  POS = "position",
+  POS = "vertex_position",
   COLOR = "color",
-  VAR_COLOR = "vColor",
-  MAT = "model_matrix",
+  VAR_COLOR = "v_color",
+  M_MAT = "u_model_matrix",
+  V_MAT = "u_view_matrix",
+  P_MAT = "u_projection_matrix",
+  FRAG_POS = "v_frag_pos",
 }
 
-const VERTEX_SHADER_SRC = `
+const DEFAULT_VSHADER_SRC = `
   precision mediump float;
   
   attribute vec3 ${GlAttrib.POS};
   attribute vec3 ${GlAttrib.COLOR};
   varying vec3 ${GlAttrib.VAR_COLOR};
 
-  uniform mat4 ${GlAttrib.MAT};
+  uniform mat4 ${GlAttrib.M_MAT};
 
   void main()
   {
-    ${GlAttrib.VAR_COLOR} = ${GlAttrib.COLOR};
-    gl_Position = ${GlAttrib.MAT} * vec4(${GlAttrib.POS}, 1);
+    ${GlAttrib.VAR_COLOR} = vec3(${GlAttrib.POS}.xy, 1);
+    gl_Position = ${GlAttrib.M_MAT} * vec4(${GlAttrib.POS}, 1);
   }
 `;
 
-const FRAG_SHADER_SRC = `
+const DEFAULT_FSHADER_SRC = `
   precision mediump float;
   
   varying vec3 ${GlAttrib.VAR_COLOR};
@@ -39,30 +42,54 @@ type InitShaderParams = {
   fShaderSrc?: string;
 };
 
-export const initGL = (
+type InitProgResult = {
+  canvas: HTMLCanvasElement;
+  gl: WebGLRenderingContext;
+  glw: GlWrapper;
+  glProg: GLProgram;
+};
+
+export const initProg = (
   canvasID: string,
-  clearColor = false
-): { canvas: HTMLCanvasElement; gl: WebGLRenderingContext } | null => {
+  shaderSources: InitShaderParams = {}
+): InitProgResult | null => {
+  // Get canvas
   const canvas = document.getElementById(canvasID) as HTMLCanvasElement; // might be null
   if (canvas === null) {
     console.error("HTML canvas not supported");
     return null;
   }
 
+  // Canvas Config
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 
+  // Get GL context
   const gl = canvas.getContext("webgl");
   if (gl === null) {
     alert("Unable to initialize WebGL");
     return null;
   }
 
-  // basic config
+  // GL Config
+  // gl.clearColor(0, 0, 0, 1)
   gl.viewport(0, 0, canvas.width, canvas.height);
-  if (clearColor) gl.clearColor(0, 0, 0, 1);
 
-  return { canvas, gl };
+  const glw = new GlWrapper(gl);
+  const shaders = glw.initShaders(shaderSources);
+  if (shaders === null) return null;
+
+  const { vShader, fShader } = shaders;
+  const glProg = glw.createGlProgram(vShader, fShader);
+  if (glProg === null) return null;
+  glProg.use();
+
+  return {
+    canvas,
+    gl,
+    glw,
+    glProg,
+  };
 };
 
 export class GlWrapper {
@@ -117,10 +144,10 @@ export class GlWrapper {
       return null;
     }
 
-    gl.shaderSource(vShader, params.vShaderSrc || VERTEX_SHADER_SRC);
+    gl.shaderSource(vShader, params.vShaderSrc || DEFAULT_VSHADER_SRC);
     gl.compileShader(vShader);
 
-    gl.shaderSource(fShader, params.fShaderSrc || FRAG_SHADER_SRC);
+    gl.shaderSource(fShader, params.fShaderSrc || DEFAULT_FSHADER_SRC);
     gl.compileShader(fShader);
 
     return { vShader, fShader };
@@ -131,8 +158,10 @@ export class GlWrapper {
     fShader: WebGLShader
   ): GLProgram | null {
     const program = this.gl.createProgram();
-    if (program === null) return null;
-
+    if (program === null) {
+      console.error("Failed to create GL program");
+      return null;
+    }
     return new GLProgram(this.gl, program, vShader, fShader);
   }
 }
@@ -186,4 +215,10 @@ class GLProgram {
 
     this.attribPtr(idx, size);
   }
+
+  getUniformLoc = (u_attrib: GlAttrib): WebGLUniformLocation | null =>
+    this.gl.getUniformLocation(this.program, u_attrib);
+
+  getAttribLoc = (attrib: GlAttrib): number =>
+    this.gl.getAttribLocation(this.program, attrib);
 }
