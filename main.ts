@@ -14,19 +14,34 @@ const main = (): void => {
   // vertex data
   const vertexData = createCubeVertices(1);
 
-  const colorData = [];
-  for (let face = 0; face < 6; face++) {
-    const faceCol = randomColorVec();
-    for (let vertex = 0; vertex < 6; vertex++) {
-      colorData.push(faceCol);
-    }
-  }
+  // const colorData = [];
+  // for (let face = 0; face < 6; face++) {
+  //   const faceCol = randomColorVec();
+  //   for (let vertex = 0; vertex < 6; vertex++) {
+  //     colorData.push(faceCol);
+  //   }
+  // }
 
   // create and load vertex and color buffer
   const posBuffer = glw.loadData(vertexData);
-  const colorBuffer = glw.loadData(colorData);
+  // const colorBuffer = glw.loadData(colorData);
 
-  const shaders = glw.createShaders();
+  const shaders = glw.initShaders({
+    vShaderSrc: `
+    precision mediump float;
+    
+    attribute vec3 ${GlAttrib.POS};
+    
+    varying vec3 ${GlAttrib.VAR_COLOR};
+    
+    uniform mat4 ${GlAttrib.MAT};
+    
+    void main(){
+      ${GlAttrib.VAR_COLOR} = vec3(${GlAttrib.POS}.xy, 1);
+      gl_Position = ${GlAttrib.MAT} * vec4(${GlAttrib.POS}, 1);
+    }
+  `,
+  });
   if (shaders === null) return;
 
   const { vShader, fShader } = shaders;
@@ -36,13 +51,13 @@ const main = (): void => {
 
   // enable vertex and color attribs
   glProg.setVAttrib(GlAttrib.POS, posBuffer, 3, true);
-  glProg.setVAttrib(GlAttrib.COLOR, colorBuffer, 3, true);
+  // glProg.setVAttrib(GlAttrib.COLOR, colorBuffer, 3, true);
 
   glProg.use();
   gl.enable(gl.DEPTH_TEST);
 
   const uniformLocations = {
-    matrix: gl.getUniformLocation(program, `matrix`),
+    matrix: gl.getUniformLocation(program, GlAttrib.MAT),
   };
 
   const modelMatrix = Mat4.create().translate([-1.5, 0, -2]);

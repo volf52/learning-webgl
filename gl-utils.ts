@@ -4,6 +4,7 @@ export enum GlAttrib {
   POS = "position",
   COLOR = "color",
   VAR_COLOR = "vColor",
+  MAT = "model_matrix",
 }
 
 const VERTEX_SHADER_SRC = `
@@ -13,12 +14,12 @@ const VERTEX_SHADER_SRC = `
   attribute vec3 ${GlAttrib.COLOR};
   varying vec3 ${GlAttrib.VAR_COLOR};
 
-  uniform mat4 matrix;
+  uniform mat4 ${GlAttrib.MAT};
 
   void main()
   {
-    vColor = color;
-    gl_Position = matrix * vec4(${GlAttrib.POS}, 1);
+    ${GlAttrib.VAR_COLOR} = ${GlAttrib.COLOR};
+    gl_Position = ${GlAttrib.MAT} * vec4(${GlAttrib.POS}, 1);
   }
 `;
 
@@ -32,6 +33,11 @@ const FRAG_SHADER_SRC = `
     gl_FragColor = vec4(${GlAttrib.VAR_COLOR}, 1);
   }
 `;
+
+type InitShaderParams = {
+  vShaderSrc?: string;
+  fShaderSrc?: string;
+};
 
 export const initGL = (
   canvasID: string,
@@ -57,21 +63,6 @@ export const initGL = (
   if (clearColor) gl.clearColor(0, 0, 0, 1);
 
   return { canvas, gl };
-};
-
-const createShader = (
-  gl: WebGLRenderingContext,
-  type: GLenum,
-  src: string
-): WebGLShader | null => {
-  const shader = gl.createShader(type);
-
-  if (shader === null) return null;
-
-  gl.shaderSource(shader, src);
-  gl.compileShader(shader);
-
-  return shader;
 };
 
 export class GlWrapper {
@@ -103,27 +94,36 @@ export class GlWrapper {
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
   }
 
-  createShaders = (
-    vShaderSrc = VERTEX_SHADER_SRC,
-    fShaderSrc = FRAG_SHADER_SRC
+  createShader(type: GLenum, src: string): WebGLShader | null {
+    const shader = this.gl.createShader(type);
+
+    if (shader === null) return null;
+
+    this.gl.shaderSource(shader, src);
+    this.gl.compileShader(shader);
+
+    return shader;
+  }
+
+  initShaders = (
+    params: InitShaderParams = {}
   ): { vShader: WebGLShader; fShader: WebGLShader } | null => {
     const { gl } = this;
-    const vertexShader = createShader(gl, gl.VERTEX_SHADER, vShaderSrc);
-    if (vertexShader === null) {
-      console.error("Failed to create vertex shader");
+
+    const vShader = gl.createShader(gl.VERTEX_SHADER);
+    const fShader = gl.createShader(gl.FRAGMENT_SHADER);
+    if (vShader === null || fShader === null) {
+      console.error("Failed to initialize shaders");
       return null;
     }
 
-    const fragShader = createShader(gl, gl.FRAGMENT_SHADER, fShaderSrc);
-    if (fragShader === null) {
-      console.error("Failed to create fragment shader");
-      return null;
-    }
+    gl.shaderSource(vShader, params.vShaderSrc || VERTEX_SHADER_SRC);
+    gl.compileShader(vShader);
 
-    return {
-      vShader: vertexShader,
-      fShader: fragShader,
-    };
+    gl.shaderSource(fShader, params.fShaderSrc || FRAG_SHADER_SRC);
+    gl.compileShader(fShader);
+
+    return { vShader, fShader };
   };
 
   createGlProgram(
