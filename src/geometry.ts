@@ -1,6 +1,6 @@
-import { Mat4, Quat } from "./mat-utils";
+import { Mat4 } from "./mat-utils";
 import { GlWrapper } from "./gl-utils";
-import { UniformLoc, TVec3 } from "./types";
+import { TVec3, UniformLoc } from "./types";
 import { genCubeVertices } from "./utils";
 
 export class CubeGeometry {
@@ -42,12 +42,15 @@ export class CubeGeometry {
     this.mat.translate(v);
   }
 
-  rotate(radX: number, radY: number): void {
-    const r = Quat.create();
-    r.rotateY(radX);
-    r.rotateX(radY);
-    this.mat.fromQuat(r);
-  }
+  // rotate(radX: number, radY: number): void {
+  //   const r = Quat.create();
+  //   r.rotateY(radX);
+  //   r.rotateX(radY);
+  //   this.mat.fromQuat(r);
+  // }
+  // rotate(radX: number, radY: number): void {
+  //   this.mat.rotateX(radX).rotateY(radY);
+  // }
 
   update(glw: GlWrapper): void {
     glw.uniformMat(this.matLoc, this.mat);

@@ -1,6 +1,16 @@
-import { TVec3, DataArray3D, TVec2, DataArray2D, DataArray } from "./types";
+import { DataArray, DataArray2D, DataArray3D, TVec2, TVec3 } from "./types";
 import { vec3 } from "gl-matrix";
 import { Vec3 } from "./mat-utils";
+
+export const getRotRadFromMouse = (
+  e: MouseEvent,
+  canvas: HTMLCanvasElement
+): { radX: number; radY: number } => {
+  const radX = (2 * (e.pageX - canvas.offsetLeft)) / canvas.width - 1;
+  const radY = (2 * (e.pageY - canvas.offsetTop)) / canvas.height - 1;
+
+  return { radX, radY };
+};
 
 export const randomColorVec = (): TVec3 => [
   Math.random(),

@@ -3,7 +3,6 @@ import { genCubeVertices, getRandomCubeColors } from "./utils";
 import { fShaderSrc, vShaderSrc } from "./shaders";
 import { GlAttrib } from "./types";
 import { Scene } from "./scene";
-import { Mat4 } from "./mat-utils";
 import { CubeGeometry } from "./geometry";
 
 const main = async (): Promise<void> => {
@@ -22,7 +21,6 @@ const main = async (): Promise<void> => {
 
   // create and load data to GPU buffers
   const cubeObj = new CubeGeometry(1.0, uniformLocations.model_matrix, glw);
-  cubeObj.translate([0, 0, -10])
   const colorBuffer = glw.loadData(colorData);
 
   // enable vertex and color attribs
@@ -30,27 +28,41 @@ const main = async (): Promise<void> => {
   glProg.setAttrib(GlAttrib.COLOR, colorBuffer, 3, true);
 
   const scene = new Scene();
-  // cubeObj.translate([2, 0, -10]);
+  scene.viewMat.translate([0, 0, -10]);
   scene.projMat.perspective((36 / 180) * Math.PI, canvas.width / canvas.height);
 
   window.addEventListener("keypress", (e) => {
-    const f = 0.1;
+    const f = 0.3;
     switch (e.key) {
       case "w":
-        // scene.viewMat.translate([0, f, 0]);
-          cubeObj.moveU(f)
+        cubeObj.moveU(f);
         break;
       case "s":
-        scene.viewMat.translate([0, -f, 0]);
+        cubeObj.moveD(f);
         break;
       case "d":
-        scene.viewMat.translate([f, 0, 0]);
+        cubeObj.moveR(f);
         break;
       case "a":
-        scene.viewMat.translate([-f, 0, 0]);
+        cubeObj.moveL(f);
         break;
     }
   });
+
+  // let mouseIsDown = false;
+  // canvas.addEventListener("mouseup", (_) => {
+  //   mouseIsDown = false;
+  // });
+  // canvas.addEventListener("mousedown", (_) => {
+  //   mouseIsDown = true;
+  // });
+  //
+  // canvas.addEventListener("mousemove", (e) => {
+  //   if (mouseIsDown) {
+  //     const { radX, radY } = getRotRadFromMouse(e, canvas);
+  //     cubeObj.rotate(radX, radY);
+  //   }
+  // });
 
   const animate = (): void => {
     cubeObj.update(glw);

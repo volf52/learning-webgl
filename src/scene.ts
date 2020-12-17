@@ -1,6 +1,6 @@
-import { Mat4, Vec3, Quat } from "./mat-utils";
+import { Mat4, Quat, Vec3 } from "./mat-utils";
 import { GlWrapper } from "./gl-utils";
-import {UniformLocations} from './types'
+import { UniformLocations } from "./types";
 
 export class Scene {
   viewMat = Mat4.create();
