@@ -1,18 +1,17 @@
-import { DataArray, GlAttrib } from "./types";
+import { DataArray, GlAttrib, UniformLocations } from "./types";
 import { Mat4 } from "./mat-utils";
 
 const DEFAULT_VSHADER_SRC = `
   precision mediump float;
   
   attribute vec3 ${GlAttrib.POS};
-  attribute vec3 ${GlAttrib.COLOR};
-  varying vec3 ${GlAttrib.VAR_COLOR};
+  varying vec3 ${GlAttrib.V_COLOR};
 
   uniform mat4 ${GlAttrib.M_MAT};
 
   void main()
   {
-    ${GlAttrib.VAR_COLOR} = vec3(${GlAttrib.POS}.xy, 1);
+    ${GlAttrib.V_COLOR} = vec3(${GlAttrib.POS}.xy, 1);
     gl_Position = ${GlAttrib.M_MAT} * vec4(${GlAttrib.POS}, 1);
   }
 `;
@@ -20,11 +19,11 @@ const DEFAULT_VSHADER_SRC = `
 const DEFAULT_FSHADER_SRC = `
   precision mediump float;
   
-  varying vec3 ${GlAttrib.VAR_COLOR};
+  varying vec3 ${GlAttrib.V_COLOR};
   
   void main()
   {
-    gl_FragColor = vec4(${GlAttrib.VAR_COLOR}, 1);
+    gl_FragColor = vec4(${GlAttrib.V_COLOR}, 1);
   }
 `;
 
@@ -38,12 +37,7 @@ interface InitProgResult {
   gl: WebGLRenderingContext;
   glw: GlWrapper;
   glProg: GLProgram;
-}
-
-export interface UniformLocations {
-  model_matrix: WebGLUniformLocation | null;
-  view_matrix: WebGLUniformLocation | null;
-  projection_matrix: WebGLUniformLocation | null;
+  uniformLocations: UniformLocations;
 }
 
 export const initProg = (
@@ -58,8 +52,8 @@ export const initProg = (
   }
 
   // Canvas Config
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  canvas.width = window.innerWidth * 0.9;
+  canvas.height = window.innerHeight * 0.9;
 
   // Get GL context
   const gl = canvas.getContext("webgl");
@@ -69,8 +63,8 @@ export const initProg = (
   }
 
   // GL Config
-  // gl.clearColor(0, 0, 0, 1)
   gl.viewport(0, 0, canvas.width, canvas.height);
+  gl.enable(gl.DEPTH_TEST);
 
   const glw = new GlWrapper(gl);
   const shaders = glw.initShaders(shaderSources);
@@ -81,11 +75,18 @@ export const initProg = (
   if (glProg === null) return null;
   glProg.use();
 
+  const uniformLocations: UniformLocations = {
+    model_matrix: glProg.getUniformLoc(GlAttrib.M_MAT),
+    view_matrix: glProg.getUniformLoc(GlAttrib.V_MAT),
+    projection_matrix: glProg.getUniformLoc(GlAttrib.P_MAT),
+  };
+
   return {
     canvas,
     gl,
     glw,
     glProg,
+    uniformLocations,
   };
 };
 
@@ -223,7 +224,7 @@ class GLProgram {
     this.gl.vertexAttribPointer(loc, size, this.gl.FLOAT, false, 0, 0);
   }
 
-  setVAttrib(
+  setAttrib(
     attrib: GlAttrib,
     buffer: WebGLBuffer | null,
     size: GLint,

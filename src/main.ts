@@ -1,8 +1,10 @@
 import { initProg } from "./gl-utils";
-import { spherePointCloud, genCubeVertices, genCubeUV } from "./utils";
-import { Scene } from "./scene";
+import { genCubeVertices, getRandomCubeColors } from "./utils";
 import { fShaderSrc, vShaderSrc } from "./shaders";
 import { GlAttrib } from "./types";
+import { Scene } from "./scene";
+import { Mat4 } from "./mat-utils";
+import { CubeGeometry } from "./geometry";
 
 const main = async (): Promise<void> => {
   const initProgResult = initProg("glCanvas", {
@@ -11,55 +13,49 @@ const main = async (): Promise<void> => {
   });
   if (initProgResult === null) return;
 
-  const { canvas, gl, glProg, glw } = initProgResult;
+  const { canvas, gl, glProg, glw, uniformLocations } = initProgResult;
 
-  const uniformLocations = {
-    model_matrix: glProg.getUniformLoc(GlAttrib.M_MAT),
-    view_matrix: glProg.getUniformLoc(GlAttrib.V_MAT),
-    projection_matrix: glProg.getUniformLoc(GlAttrib.P_MAT),
-  };
-  const scene = new Scene(glw);
-  scene.projMat.perspective(Math.PI / 2, 16 / 9);
-  window.addEventListener("keypress", (e) => {
-    let toAdd = 0.25;
-    let idx = 2;
-    switch (e.key) {
-      case "w": // 2, .25
-        break;
-      case "s": // 2, -.25
-        toAdd = -0.25;
-        break;
-      case "a": // 0, -.25
-        toAdd = -0.25; // skipcq
-      case "d": // 0, .25
-        idx = 0;
-        break;
-      default:
-        return;
-    }
+  //============== Data Loading ==========
+  // Cube vertex and UV data
+  const vertexData = genCubeVertices(1.0);
+  const colorData = getRandomCubeColors();
 
-    scene.camera.translation.idxAdd(idx, toAdd);
-  });
+  // create and load data to GPU buffers
+  const cubeObj = new CubeGeometry(1.0, uniformLocations.model_matrix, glw);
+  cubeObj.translate([0, 0, -10])
+  const colorBuffer = glw.loadData(colorData);
 
-  canvas.addEventListener("mousemove", (e) => {
-    const radX = (2 * (e.pageX - canvas.offsetLeft)) / canvas.width - 1;
-    const radY = (2 * (e.pageY - canvas.offsetTop)) / canvas.height - 1;
-
-    scene.rotateModel(radX, -radY);
-  });
-
-  // vertex data
-  const vertexData = spherePointCloud(1e5, 0.75);
-  const uvData = genCubeUV();
-  // create and load vertex data to GPU buffer
-  const posBuffer = glw.loadData(vertexData);
   // enable vertex and color attribs
-  glProg.setVAttrib(GlAttrib.POS, posBuffer, 3, true);
-  gl.enable(gl.DEPTH_TEST);
+  glProg.setAttrib(GlAttrib.POS, cubeObj.getBuff(), 3, true);
+  glProg.setAttrib(GlAttrib.COLOR, colorBuffer, 3, true);
+
+  const scene = new Scene();
+  // cubeObj.translate([2, 0, -10]);
+  scene.projMat.perspective((36 / 180) * Math.PI, canvas.width / canvas.height);
+
+  window.addEventListener("keypress", (e) => {
+    const f = 0.1;
+    switch (e.key) {
+      case "w":
+        // scene.viewMat.translate([0, f, 0]);
+          cubeObj.moveU(f)
+        break;
+      case "s":
+        scene.viewMat.translate([0, -f, 0]);
+        break;
+      case "d":
+        scene.viewMat.translate([f, 0, 0]);
+        break;
+      case "a":
+        scene.viewMat.translate([-f, 0, 0]);
+        break;
+    }
+  });
 
   const animate = (): void => {
-    scene.update(uniformLocations);
-    glw.drawPoints(vertexData.length);
+    cubeObj.update(glw);
+    scene.update(glw, uniformLocations);
+    glw.drawTriangles(vertexData.length);
     requestAnimationFrame(animate);
   };
 

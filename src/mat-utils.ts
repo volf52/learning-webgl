@@ -150,6 +150,11 @@ export class Mat4 {
     return new Mat4(m);
   }
 
+  identity(): Mat4 {
+    mat4.identity(this.mat);
+    return this;
+  }
+
   fromQuat(q: Quat | quat): Mat4 {
     let qr: quat;
     if (q instanceof Quat) qr = q.get();

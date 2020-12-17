@@ -8,6 +8,16 @@ export const randomColorVec = (): TVec3 => [
   Math.random(),
 ];
 
+export const getRandomCubeColors = (): DataArray3D => {
+  const colors = [];
+  for (let i = 0; i < 6; i++) {
+    const faceColor = randomColorVec();
+    for (let j = 0; j < 6; j++) colors.push(faceColor);
+  }
+
+  return colors;
+};
+
 /**
  *
  * @return {number} a random number between -1 and 1
