@@ -63,6 +63,8 @@ const main = async (): Promise<void> => {
   });
 
   const animate = (): void => {
+    requestAnimationFrame(animate);
+
     // Data updates
     cubeObj.rotate(Math.PI / 60, Math.PI / 60);
 
@@ -70,7 +72,6 @@ const main = async (): Promise<void> => {
     cubeObj.update(glw);
     scene.update(glw, uniformLocations);
     glw.drawTriangles(vertexData.length);
-    requestAnimationFrame(animate);
   };
 
   animate();
