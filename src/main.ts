@@ -14,26 +14,23 @@ const main = async (): Promise<void> => {
 
   const { canvas, glProg, glw, uniformLocations } = initProgResult;
 
-  // Check texture
+  // Load texture
   const brick = glw.loadTexture("textures/default_brick.png");
   console.log(brick);
 
   //============== Data Loading ==========
   // Cube vertex and UV data
   const vertexData = genCubeVertices(1.0);
-  const colorData = getRandomCubeColors();
 
   // create and load data to GPU buffers
   const cubeObj = new CubeGeometry(1.0, uniformLocations.model_matrix, glw);
-  const colorBuffer = glw.loadData(colorData);
 
   // enable vertex and color attribs
   glProg.setAttrib(GlAttrib.POS, cubeObj.getBuff(), 3, true);
-  glProg.setAttrib(GlAttrib.COLOR, colorBuffer, 3, true);
 
   const scene = new Scene();
-  scene.viewMat.translate([0, 0, -10]);
-  scene.projMat.perspective((36 / 180) * Math.PI, canvas.width / canvas.height);
+  scene.viewMat.translate([0, 0.1, 2]).invert();
+  scene.projMat.perspective((75 / 180) * Math.PI, canvas.width / canvas.height);
 
   window.addEventListener("keypress", (e) => {
     const f = 0.3;
@@ -66,6 +63,10 @@ const main = async (): Promise<void> => {
   });
 
   const animate = (): void => {
+    // Data updates
+    cubeObj.rotate(Math.PI / 60, Math.PI / 60);
+
+    // Render Part
     cubeObj.update(glw);
     scene.update(glw, uniformLocations);
     glw.drawTriangles(vertexData.length);

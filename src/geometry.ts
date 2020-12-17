@@ -42,6 +42,18 @@ export class CubeGeometry {
     this.mat.translate(v);
   }
 
+  rotate(radX: number, radY: number): void {
+    this.mat.rotateX(radX).rotateY(radY);
+  }
+
+  rotateX(rad: number): void {
+    this.mat.rotateX(rad);
+  }
+
+  rotateY(rad: number): void {
+    this.mat.rotateY(rad);
+  }
+
   update(glw: GlWrapper): void {
     glw.uniformMat(this.matLoc, this.mat);
   }
