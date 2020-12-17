@@ -1,7 +1,7 @@
 export type TVec2 = readonly [number, number];
 export type TVec3 = readonly [number, number, number];
-export type DataArray3D = Array<TVec3>;
-export type DataArray2D = Array<TVec2>;
+export type DataArray2D = TVec2[];
+export type DataArray3D = TVec3[];
 
 export type DataArray = DataArray2D | DataArray3D;
 

@@ -1,4 +1,4 @@
-import { mat4, ReadonlyVec3, vec3, quat } from "gl-matrix";
+import { mat4, quat, ReadonlyVec3, vec3 } from "gl-matrix";
 
 const RAD_PER_DEG = Math.PI / 180;
 export const toRadians = (deg: number): number => {
@@ -123,6 +123,12 @@ export class Quat {
 }
 
 export class Mat4 {
+  private static readonly UP = vec3.fromValues(0, 1, 0);
+  private static readonly DOWN = vec3.fromValues(0, -1, 0);
+  private static readonly LEFT = vec3.fromValues(-1, 0, 0);
+  private static readonly RIGHT = vec3.fromValues(1, 0, 0);
+  private static arithBuffer = vec3.create();
+
   private mat: mat4;
 
   private constructor(m: mat4) {
@@ -174,6 +180,31 @@ export class Mat4 {
 
   translate(vec: ReadonlyVec3): Mat4 {
     mat4.translate(this.mat, this.mat, vec);
+    return this;
+  }
+
+  private move(u: number, v: vec3): void {
+    vec3.scale(Mat4.arithBuffer, v, u);
+    mat4.translate(this.mat, this.mat, Mat4.arithBuffer);
+  }
+
+  mvLeft(units: number): Mat4 {
+    this.move(units, Mat4.LEFT);
+    return this;
+  }
+
+  mvRight(units: number): Mat4 {
+    this.move(units, Mat4.RIGHT);
+    return this;
+  }
+
+  mvUp(units: number): Mat4 {
+    this.move(units, Mat4.UP);
+    return this;
+  }
+
+  mvDown(units: number): Mat4 {
+    this.move(units, Mat4.DOWN);
     return this;
   }
 

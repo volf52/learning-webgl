@@ -22,35 +22,25 @@ export class CubeGeometry {
     return this.dataBuffer;
   }
 
-  moveR(units: number): void {
-    this.mat.translate([units, 0, 0]);
+  mvRight(units: number): void {
+    this.mat.mvRight(units);
   }
 
-  moveL(units: number): void {
-    this.mat.translate([-units, 0, 0]);
+  mvLeft(units: number): void {
+    this.mat.mvLeft(units);
   }
 
-  moveU(units: number): void {
-    this.mat.translate([0, units, 0]);
+  mvUp(units: number): void {
+    this.mat.mvUp(units);
   }
 
-  moveD(units: number): void {
-    this.mat.translate([0, -units, 0]);
+  mvDown(units: number): void {
+    this.mat.mvDown(units);
   }
 
   translate(v: TVec3): void {
     this.mat.translate(v);
   }
-
-  // rotate(radX: number, radY: number): void {
-  //   const r = Quat.create();
-  //   r.rotateY(radX);
-  //   r.rotateX(radY);
-  //   this.mat.fromQuat(r);
-  // }
-  // rotate(radX: number, radY: number): void {
-  //   this.mat.rotateX(radX).rotateY(radY);
-  // }
 
   update(glw: GlWrapper): void {
     glw.uniformMat(this.matLoc, this.mat);

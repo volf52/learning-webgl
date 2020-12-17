@@ -12,7 +12,7 @@ const main = async (): Promise<void> => {
   });
   if (initProgResult === null) return;
 
-  const { canvas, gl, glProg, glw, uniformLocations } = initProgResult;
+  const { canvas, glProg, glw, uniformLocations } = initProgResult;
 
   //============== Data Loading ==========
   // Cube vertex and UV data
@@ -35,34 +35,31 @@ const main = async (): Promise<void> => {
     const f = 0.3;
     switch (e.key) {
       case "w":
-        cubeObj.moveU(f);
+        cubeObj.mvUp(f);
         break;
       case "s":
-        cubeObj.moveD(f);
+        cubeObj.mvDown(f);
         break;
       case "d":
-        cubeObj.moveR(f);
+        cubeObj.mvRight(f);
         break;
       case "a":
-        cubeObj.moveL(f);
+        cubeObj.mvLeft(f);
+        break;
+      case "i":
+        scene.viewMat.mvDown(f);
+        break;
+      case "k":
+        scene.viewMat.mvUp(f);
+        break;
+      case "j":
+        scene.viewMat.mvRight(f);
+        break;
+      case "l":
+        scene.viewMat.mvLeft(f);
         break;
     }
   });
-
-  // let mouseIsDown = false;
-  // canvas.addEventListener("mouseup", (_) => {
-  //   mouseIsDown = false;
-  // });
-  // canvas.addEventListener("mousedown", (_) => {
-  //   mouseIsDown = true;
-  // });
-  //
-  // canvas.addEventListener("mousemove", (e) => {
-  //   if (mouseIsDown) {
-  //     const { radX, radY } = getRotRadFromMouse(e, canvas);
-  //     cubeObj.rotate(radX, radY);
-  //   }
-  // });
 
   const animate = (): void => {
     cubeObj.update(glw);

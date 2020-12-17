@@ -72,7 +72,7 @@ const genFace = (
   v2: TVec2 | TVec3,
   v3: TVec2 | TVec3
 ): DataArray => {
-  let res = [v0, v1, v2, v2, v1, v3];
+  const res = [v0, v1, v2, v2, v1, v3];
   if (v0.length === 2) return res as DataArray2D;
   else return res as DataArray3D;
 };
