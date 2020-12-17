@@ -182,10 +182,14 @@ export class GlWrapper {
 
     img.addEventListener("load", (_) => {
       gl.bindTexture(gl.TEXTURE_2D, texture);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_INT, img);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+      gl.generateMipmap(gl.TEXTURE_2D);
+
+      console.log(`texture '${url}' loaded`);
     });
 
     img.src = url;
+    document.body.appendChild(img); // sanity check
     return texture;
   }
 }
