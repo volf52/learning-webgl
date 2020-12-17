@@ -127,7 +127,7 @@ export class Mat4 {
   private static readonly DOWN = vec3.fromValues(0, -1, 0);
   private static readonly LEFT = vec3.fromValues(-1, 0, 0);
   private static readonly RIGHT = vec3.fromValues(1, 0, 0);
-  private static arithBuffer = vec3.create();
+  private static readonly arithBuffer = vec3.create();
 
   private mat: mat4;
 
