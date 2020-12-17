@@ -1,4 +1,32 @@
-import { DataArray, Vec3 } from "./types";
+import { TVec3, DataArray } from "./types";
+import { vec3 } from "gl-matrix";
+import { Vec3 } from "./mat-utils";
+
+export const randomColorVec = (): TVec3 => [
+  Math.random(),
+  Math.random(),
+  Math.random(),
+];
+
+/**
+ *
+ * @return {number} a random number between -1 and 1
+ */
+const randomPoint = (): number => Math.random() * 2 - 1;
+
+export const spherePointCloud = (num: number, radius = 1.0): DataArray => {
+  const points: DataArray = [];
+  for (let i = 0; i < num; i++) {
+    const point: vec3 = Vec3.from([randomPoint(), randomPoint(), randomPoint()])
+      .normalize()
+      .scale(radius)
+      .get();
+
+    points.push([point[0], point[1], point[2]]);
+  }
+
+  return points;
+};
 
 /**
  * Create the triangle vertices from the face's corner vertices.
@@ -18,7 +46,7 @@ import { DataArray, Vec3 } from "./types";
  * @return d: DataArray [...Triangle 1 vertices, ...Triangle 2 vertices]
  *
  */
-const createFace = (v0: Vec3, v1: Vec3, v2: Vec3, v3: Vec3): DataArray => {
+const createFace = (v0: TVec3, v1: TVec3, v2: TVec3, v3: TVec3): DataArray => {
   return [v0, v1, v2, v2, v1, v3];
 };
 
@@ -41,14 +69,14 @@ export const createCuboidVertices = (
   // vIndices for each face are described as: 0 -> top-right, 1 -> bottom-right, 2 -> top-left, 3 -> bottom-left
   // Triangles for each face are drawn in this way: Triangle 1: (0 -> 1 -> 2), Triangle 2: (2 -> 1 -> 3)
 
-  const v0: Vec3 = [l, h, w];
-  const v1: Vec3 = [l, -h, w];
-  const v2: Vec3 = [-l, h, w];
-  const v3: Vec3 = [-l, -h, w];
-  const v4: Vec3 = [-l, h, -w];
-  const v5: Vec3 = [-l, -h, -w];
-  const v6: Vec3 = [l, h, -w];
-  const v7: Vec3 = [l, -h, -w];
+  const v0: TVec3 = [l, h, w];
+  const v1: TVec3 = [l, -h, w];
+  const v2: TVec3 = [-l, h, w];
+  const v3: TVec3 = [-l, -h, w];
+  const v4: TVec3 = [-l, h, -w];
+  const v5: TVec3 = [-l, -h, -w];
+  const v6: TVec3 = [l, h, -w];
+  const v7: TVec3 = [l, -h, -w];
 
   return [
     // Front: v0, v1, v2, v3
