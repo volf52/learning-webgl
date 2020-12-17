@@ -66,4 +66,10 @@ const main = async (): Promise<void> => {
   animate();
 };
 
-window.addEventListener("load", async (_) => main());
+window.addEventListener("load", async (_) => {
+  try {
+    await main();
+  } catch (e) {
+    console.error(e);
+  }
+});

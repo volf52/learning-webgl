@@ -48,7 +48,6 @@ export class Vec3 {
   }
 
   idxAdd(idx: number, toAdd: number): Vec3 {
-    const r = this.vec[idx];
     this.vec[idx] += toAdd;
 
     return this;
