@@ -1,11 +1,10 @@
 import { initProg } from "./gl-utils";
-import { spherePointCloud } from "./utils";
+import { spherePointCloud, genCubeVertices, genCubeUV } from "./utils";
 import { Scene } from "./scene";
 import { fShaderSrc, vShaderSrc } from "./shaders";
 import { GlAttrib } from "./types";
 
 const main = async (): Promise<void> => {
-  console.log(vShaderSrc);
   const initProgResult = initProg("glCanvas", {
     vShaderSrc,
     fShaderSrc,
@@ -51,6 +50,7 @@ const main = async (): Promise<void> => {
 
   // vertex data
   const vertexData = spherePointCloud(1e5, 0.75);
+  const uvData = genCubeUV();
   // create and load vertex data to GPU buffer
   const posBuffer = glw.loadData(vertexData);
   // enable vertex and color attribs

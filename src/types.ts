@@ -1,7 +1,9 @@
-type TVec3 = readonly [number, number, number];
-type DataArray = Array<number | TVec3>;
+export type TVec2 = readonly [number, number];
+export type TVec3 = readonly [number, number, number];
+export type DataArray3D = Array<TVec3>;
+export type DataArray2D = Array<TVec2>;
 
-// type DataArray = Array<number | DataArray>
+export type DataArray = DataArray2D | DataArray3D;
 
 export enum GlAttrib {
   POS = "vertex_position",
@@ -12,5 +14,3 @@ export enum GlAttrib {
   P_MAT = "u_projection_matrix",
   FRAG_POS = "v_frag_pos",
 }
-
-export { DataArray, TVec3 };
