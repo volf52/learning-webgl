@@ -66,10 +66,11 @@ const main = async (): Promise<void> => {
   animate();
 };
 
-window.addEventListener("load", async (_) => {
+// skipcq
+window.onload = async () => {
   try {
     await main();
   } catch (e) {
     console.error(e);
   }
-});
+};
