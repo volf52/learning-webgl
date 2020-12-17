@@ -174,6 +174,20 @@ export class GlWrapper {
   drawPoints(len: number, first = 0): void {
     this.gl.drawArrays(this.gl.POINTS, first, len);
   }
+
+  loadTexture(url: string): WebGLTexture | null {
+    const { gl } = this;
+    const texture = gl.createTexture();
+    const img = new Image();
+
+    img.addEventListener("load", (_) => {
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_INT, img);
+    });
+
+    img.src = url;
+    return texture;
+  }
 }
 
 class GLProgram {

@@ -14,6 +14,10 @@ const main = async (): Promise<void> => {
 
   const { canvas, glProg, glw, uniformLocations } = initProgResult;
 
+  // Check texture
+  const brick = glw.loadTexture("textures/default_brick.png");
+  console.log(brick);
+
   //============== Data Loading ==========
   // Cube vertex and UV data
   const vertexData = genCubeVertices(1.0);
