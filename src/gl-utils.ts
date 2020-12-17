@@ -1,7 +1,6 @@
 import { DataArray, GlAttrib } from "./types";
 import { Mat4 } from "./mat-utils";
 
-
 const DEFAULT_VSHADER_SRC = `
   precision mediump float;
   
@@ -29,23 +28,23 @@ const DEFAULT_FSHADER_SRC = `
   }
 `;
 
-type InitShaderParams = {
+interface InitShaderParams {
   vShaderSrc?: string;
   fShaderSrc?: string;
-};
+}
 
-type InitProgResult = {
+interface InitProgResult {
   canvas: HTMLCanvasElement;
   gl: WebGLRenderingContext;
   glw: GlWrapper;
   glProg: GLProgram;
-};
+}
 
-export type UniformLocations = {
+export interface UniformLocations {
   model_matrix: WebGLUniformLocation | null;
   view_matrix: WebGLUniformLocation | null;
   projection_matrix: WebGLUniformLocation | null;
-};
+}
 
 export const initProg = (
   canvasID: string,
@@ -71,7 +70,7 @@ export const initProg = (
 
   // GL Config
   // gl.clearColor(0, 0, 0, 1)
-  // gl.viewport(0, 0, canvas.width, canvas.height);
+  gl.viewport(0, 0, canvas.width, canvas.height);
 
   const glw = new GlWrapper(gl);
   const shaders = glw.initShaders(shaderSources);
@@ -142,10 +141,10 @@ export class GlWrapper {
       return null;
     }
 
-    gl.shaderSource(vShader, params.vShaderSrc || DEFAULT_VSHADER_SRC);
+    gl.shaderSource(vShader, params.vShaderSrc || DEFAULT_VSHADER_SRC); // skipcq
     gl.compileShader(vShader);
 
-    gl.shaderSource(fShader, params.fShaderSrc || DEFAULT_FSHADER_SRC);
+    gl.shaderSource(fShader, params.fShaderSrc || DEFAULT_FSHADER_SRC); // skipcq
     gl.compileShader(fShader);
 
     return { vShader, fShader };
@@ -163,15 +162,15 @@ export class GlWrapper {
     return new GLProgram(this.gl, program, vShader, fShader);
   }
 
-  uniformMat(loc: WebGLUniformLocation | null, mat: Mat4) {
+  uniformMat(loc: WebGLUniformLocation | null, mat: Mat4): void {
     this.gl.uniformMatrix4fv(loc, false, mat.get());
   }
 
-  drawTriangles(len: number, first = 0) {
+  drawTriangles(len: number, first = 0): void {
     this.gl.drawArrays(this.gl.TRIANGLES, first, len);
   }
 
-  drawPoints(len: number, first = 0) {
+  drawPoints(len: number, first = 0): void {
     this.gl.drawArrays(this.gl.POINTS, first, len);
   }
 }
@@ -193,8 +192,10 @@ class GLProgram {
     gl.attachShader(program, fShader);
     gl.linkProgram(program);
 
-    if(!gl.getProgramParameter(program, gl.LINK_STATUS)){
-      console.error(`(WebGL shader program) ${gl.getProgramInfoLog(program)}`)
+    if (!(gl.getProgramParameter(program, gl.LINK_STATUS) as GLboolean)) {
+      console.error(
+        `(WebGL shader program) ${gl.getProgramInfoLog(program) as string}`
+      );
     }
   }
 
@@ -209,8 +210,8 @@ class GLProgram {
     bind = false
   ): GLint {
     const location = this.gl.getAttribLocation(this.program, attrib);
-    if(location < 0){
-      console.log(`Attrib: ${attrib}\tIndex: ${location}`)
+    if (location < 0) {
+      console.log(`Attrib: ${attrib}\tIndex: ${location}`);
     }
     this.gl.enableVertexAttribArray(location);
     if (bind) this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
@@ -233,8 +234,8 @@ class GLProgram {
     this.attribPtr(idx, size);
   }
 
-  getUniformLoc = (u_attrib: GlAttrib): WebGLUniformLocation | null =>
-    this.gl.getUniformLocation(this.program, u_attrib);
+  getUniformLoc = (attrib: GlAttrib): WebGLUniformLocation | null =>
+    this.gl.getUniformLocation(this.program, attrib);
 
   getAttribLoc = (attrib: GlAttrib): number =>
     this.gl.getAttribLocation(this.program, attrib);

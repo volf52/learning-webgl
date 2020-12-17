@@ -1,14 +1,5 @@
 import { mat4, ReadonlyVec3, vec3, quat } from "gl-matrix";
 
-// Normalize to make the distance from origin = 1
-const normalize = (v: ReadonlyVec3): ReadonlyVec3 => {
-  const [x, y, z] = v;
-  let len = x * x + y * y + z * z;
-  if (len > 0) len = 1 / Math.sqrt(len);
-
-  return [x * len, y * len, z * len];
-};
-
 const RAD_PER_DEG = Math.PI / 180;
 export const toRadians = (deg: number): number => {
   return deg * RAD_PER_DEG;
@@ -29,7 +20,7 @@ export class Vec3 {
     return new Vec3(vec3.fromValues(v[0], v[1], v[2]));
   }
 
-  set(v: vec3) {
+  set(v: vec3): void {
     this.vec = v;
   }
 
@@ -56,7 +47,8 @@ export class Vec3 {
     return this;
   }
 
-  idxAdd(idx: number, toAdd: number) {
+  idxAdd(idx: number, toAdd: number): Vec3 {
+    const r = this.vec[idx];
     this.vec[idx] += toAdd;
 
     return this;
@@ -69,7 +61,7 @@ export class Vec3 {
   }
 
   normalized(): Vec3 {
-    let v = Vec3.create();
+    const v = Vec3.create();
 
     vec3.normalize(v.vec, this.vec);
     return v;
@@ -98,7 +90,7 @@ export class Vec3 {
 }
 
 export class Quat {
-  private q: quat;
+  private readonly q: quat;
 
   private constructor(q: quat) {
     this.q = q;
@@ -148,12 +140,12 @@ export class Mat4 {
     return new Mat4(mat);
   }
 
-  static fromQuat(q: Quat | quat) {
+  static fromQuat(q: Quat | quat): Mat4 {
     let qr: quat;
     if (q instanceof Quat) qr = q.get();
     else qr = q;
 
-    let m = mat4.create();
+    const m = mat4.create();
     mat4.fromQuat(m, qr);
 
     return new Mat4(m);
@@ -235,7 +227,7 @@ export class Mat4 {
     return this;
   }
 
-  lookAt(eye: Vec3, center: Vec3, up: Vec3) {
+  lookAt(eye: Vec3, center: Vec3, up: Vec3): Mat4 {
     mat4.lookAt(this.mat, eye.get(), center.get(), up.get());
 
     return this;

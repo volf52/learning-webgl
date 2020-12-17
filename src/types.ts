@@ -1,5 +1,6 @@
 type TVec3 = readonly [number, number, number];
 type DataArray = Array<number | TVec3>;
+
 // type DataArray = Array<number | DataArray>
 
 export enum GlAttrib {

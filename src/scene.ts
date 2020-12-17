@@ -24,7 +24,7 @@ export class Scene {
     this.modelMat.fromQuat(r);
   }
 
-  update(locations: UniformLocations) {
+  update(locations: UniformLocations): void {
     this.modelMat.rotateY(Math.PI / 300);
     const center = this.camera.translation.add([0, 0, 1]);
 

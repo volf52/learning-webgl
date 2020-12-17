@@ -31,7 +31,7 @@ const main = async (): Promise<void> => {
         toAdd = -0.25;
         break;
       case "a": // 0, -.25
-        toAdd = -0.25;
+        toAdd = -0.25; // skipcq
       case "d": // 0, .25
         idx = 0;
         break;
@@ -66,4 +66,4 @@ const main = async (): Promise<void> => {
   animate();
 };
 
-window.addEventListener("load", (_) => main());
+window.addEventListener("load", async (_) => main());

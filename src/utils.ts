@@ -10,12 +10,12 @@ export const randomColorVec = (): TVec3 => [
 
 /**
  *
- * @return {number} a random number between -0.5 and 0.5
+ * @return {number} a random number between -1 and 1
  */
 const randomPoint = (): number => Math.random() * 2 - 1;
 
 export const spherePointCloud = (num: number, radius = 1.0): DataArray => {
-  let points: DataArray = [];
+  const points: DataArray = [];
   for (let i = 0; i < num; i++) {
     const point: vec3 = Vec3.from([randomPoint(), randomPoint(), randomPoint()])
       .normalize()
