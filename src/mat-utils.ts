@@ -184,6 +184,16 @@ export class Mat4 {
     return this;
   }
 
+  transpose(): Mat4 {
+    mat4.transpose(this.mat, this.mat);
+    return this;
+  }
+
+  transposed(into: Mat4): Mat4 {
+    mat4.transpose(into.mat, this.mat);
+    return into;
+  }
+
   private move(u: number, v: vec3): void {
     vec3.scale(Mat4.arithBuffer, v, u);
     mat4.translate(this.mat, this.mat, Mat4.arithBuffer);
@@ -244,7 +254,7 @@ export class Mat4 {
     return this;
   }
 
-  mul(other: Mat4 | mat4, out?: Mat4): Mat4 {
+  mul(other: Mat4, out?: Mat4): Mat4 {
     let result: Mat4;
 
     if (out === undefined || out === null) {
@@ -253,13 +263,13 @@ export class Mat4 {
       result = out;
     }
 
-    mat4.multiply(result.mat, this.mat, this.getUnderlying(other));
+    mat4.multiply(result.mat, this.mat, other.mat);
 
     return result;
   }
 
-  mulp(other: Mat4 | mat4): Mat4 {
-    mat4.mul(this.mat, this.mat, this.getUnderlying(other));
+  mulp(other: Mat4): Mat4 {
+    mat4.mul(this.mat, this.mat, other.mat);
     return this;
   }
 
@@ -269,15 +279,14 @@ export class Mat4 {
     return this;
   }
 
-  invert(toInvert?: Mat4): Mat4 {
-    let r: Mat4;
-
-    if (toInvert === undefined || toInvert === null) r = this;
-    else r = toInvert;
-
-    mat4.invert(this.mat, r.mat);
-
+  invert(): Mat4 {
+    mat4.invert(this.mat, this.mat);
     return this;
+  }
+
+  inverted(into: Mat4): Mat4 {
+    mat4.invert(into.mat, this.mat);
+    return into;
   }
 
   str(): string {
@@ -288,10 +297,5 @@ export class Mat4 {
     console.log(mat4.str(this.mat));
 
     return this;
-  }
-
-  private getUnderlying(m: Mat4 | mat4): mat4 {
-    if (m instanceof Mat4) return m.mat;
-    else return m;
   }
 }
