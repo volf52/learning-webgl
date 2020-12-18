@@ -1,4 +1,4 @@
-import { DataArray, GlAttrib, UniformLocations } from "./types";
+import { DataArray, GlAttrib, GlBuff, UniformLocations } from "./types";
 import { Mat4 } from "./mat-utils";
 
 const DEFAULT_VSHADER_SRC = `
@@ -7,12 +7,12 @@ const DEFAULT_VSHADER_SRC = `
   attribute vec3 ${GlAttrib.POS};
   varying vec3 ${GlAttrib.V_COLOR};
 
-  uniform mat4 ${GlAttrib.M_MAT};
+  uniform mat4 ${GlAttrib.MAT_MODEL};
 
   void main()
   {
     ${GlAttrib.V_COLOR} = vec3(${GlAttrib.POS}.xy, 1);
-    gl_Position = ${GlAttrib.M_MAT} * vec4(${GlAttrib.POS}, 1);
+    gl_Position = ${GlAttrib.MAT_MODEL} * vec4(${GlAttrib.POS}, 1);
   }
 `;
 
@@ -76,9 +76,8 @@ export const initProg = (
   glProg.use();
 
   const uniformLocations: UniformLocations = {
-    model_matrix: glProg.getUniformLoc(GlAttrib.M_MAT),
-    view_matrix: glProg.getUniformLoc(GlAttrib.V_MAT),
-    projection_matrix: glProg.getUniformLoc(GlAttrib.P_MAT),
+    mvp_matrix: glProg.getUniformLoc(GlAttrib.MAT_MVP),
+    normal_matrix: glProg.getUniformLoc(GlAttrib.MAT_NORMAL),
   };
 
   return {
@@ -97,7 +96,7 @@ export class GlWrapper {
     this.gl = gl;
   }
 
-  loadData(data: DataArray): WebGLBuffer | null {
+  loadData(data: DataArray): GlBuff {
     const { gl } = this;
 
     // Create buffer
@@ -115,7 +114,7 @@ export class GlWrapper {
     return buffer;
   }
 
-  bindBuffer(buffer: WebGLBuffer | null): void {
+  bindBuffer(buffer: GlBuff): void {
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
   }
 
@@ -223,34 +222,15 @@ class GLProgram {
     this.gl.useProgram(this.program);
   }
 
-  getAndEnableAttrib(
-    attrib: GlAttrib,
-    buffer: WebGLBuffer | null,
-    bind = false
-  ): GLint {
-    const location = this.gl.getAttribLocation(this.program, attrib);
-    if (location < 0) {
-      console.log(`Attrib: ${attrib}\tIndex: ${location}`);
-    }
-    this.gl.enableVertexAttribArray(location);
-    if (bind) this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffer);
+  setAttrib(attrib: GlAttrib, buffer: GlBuff, size: GLint, bind = false): void {
+    const gl = this.gl;
+    const loc = gl.getAttribLocation(this.program, attrib);
 
-    return location;
-  }
+    if (loc < 0) console.error(`Attrib: ${attrib}\tIndex: ${loc}`);
+    gl.enableVertexAttribArray(loc);
+    if (bind) gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 
-  attribPtr(loc: number, size: GLint): void {
-    this.gl.vertexAttribPointer(loc, size, this.gl.FLOAT, false, 0, 0);
-  }
-
-  setAttrib(
-    attrib: GlAttrib,
-    buffer: WebGLBuffer | null,
-    size: GLint,
-    bind = false
-  ): void {
-    const idx = this.getAndEnableAttrib(attrib, buffer, bind);
-
-    this.attribPtr(idx, size);
+    gl.vertexAttribPointer(loc, size, gl.FLOAT, false, 0, 0);
   }
 
   getUniformLoc = (attrib: GlAttrib): WebGLUniformLocation | null =>

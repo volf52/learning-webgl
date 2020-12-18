@@ -1,38 +1,45 @@
 import { GlAttrib } from "./types";
 
-const { M_MAT, POS, UV, V_UV, COLOR, V_COLOR, V_MAT, P_MAT } = GlAttrib;
+const { POS, UV, V_UV, NORMAL, MAT_NORMAL, V_BRIGHT, MAT_MVP } = GlAttrib;
 
 export const vShaderSrc = `
-  precision mediump float;
-  
-  attribute vec3 ${POS};
-  //attribute vec3 ${COLOR};
-  attribute vec2 ${UV};
-  
-  uniform mat4 ${M_MAT};
-  uniform mat4 ${V_MAT};
-  uniform mat4 ${P_MAT};
-  
-  varying vec2 ${V_UV};
-  //varying vec3 ${V_COLOR};
-  
-  void main() {
-      ${V_UV} = ${UV};
-      //${V_COLOR} = ${COLOR};
-      mat4 mvp = ${P_MAT} * ${V_MAT} * ${M_MAT};
-      gl_Position = mvp * vec4(${POS}, 1);
-  }
+      precision mediump float;
+
+      const vec3 lightDirection = normalize(vec3(0, 1.0, 1.0));
+      const float ambient = 0.1;
+      
+      attribute vec3 ${POS};
+      attribute vec2 ${UV};
+      attribute vec3 ${NORMAL};
+      
+      varying vec2 ${V_UV};
+      varying float ${V_BRIGHT};
+      
+      uniform mat4 ${MAT_MVP};
+      uniform mat4 ${MAT_NORMAL};
+      
+      void main() {
+            vec3 worldNormal = (${MAT_NORMAL} * vec4(${NORMAL}, 1)).xyz;
+            float diffuse = max(0.0, dot(worldNormal, lightDirection));
+            
+            ${V_UV} = ${UV};
+            ${V_BRIGHT} = ambient + diffuse;
+            
+            gl_Position = ${MAT_MVP} * vec4(${POS}, 1);
+      }
 `;
 
 export const fShaderSrc = `
-  precision mediump float;
-  
-  //varying vec3 ${V_COLOR};
-  varying vec2 ${V_UV};
-  uniform sampler2D textureID;
-  
-  void main() {
-      gl_FragColor = texture2D(textureID, ${V_UV});
-      //gl_FragColor = vec4(${V_COLOR}, 1);
-  }
+      precision mediump float;
+
+      varying vec2 ${V_UV};
+      varying float ${V_BRIGHT};
+      
+      uniform sampler2D textureID;
+      
+      void main() {
+        vec4 texel = texture2D(textureID, ${V_UV});
+        texel.xyz *= ${V_BRIGHT};
+        gl_FragColor = texel;
+      }
 `;

@@ -151,3 +151,21 @@ export const genCubeUV = (): DataArray2D => {
 
   return data;
 };
+
+export const genCubeNormals = (): DataArray3D => {
+  const faceData: DataArray3D = [
+    [0, 0, 1], // F = +Z
+    [-1, 0, 0], // L = -X
+    [0, 0, -1], // B = -Z
+    [1, 0, 0], // R = +X
+    [0, 1, 0], // T = +Y
+    [0, -1, 0], // U = -Y
+  ];
+
+  const data = [];
+
+  for (let faceIdx = 0; faceIdx < 6; faceIdx++)
+    for (let j = 0; j < 6; j++) data.push(faceData[faceIdx]);
+
+  return data;
+};

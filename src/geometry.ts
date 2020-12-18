@@ -1,25 +1,39 @@
 import { Mat4 } from "./mat-utils";
 import { GlWrapper } from "./gl-utils";
-import { TVec3, UniformLoc } from "./types";
-import { genCubeVertices } from "./utils";
+import { GlBuff, TVec3 } from "./types";
+import { genCubeNormals, genCubeVertices } from "./utils";
 
 export class CubeGeometry {
-  private readonly mat: Mat4;
-  private readonly matLoc: UniformLoc;
-  private readonly dataBuffer: WebGLBuffer | null;
+  static readonly DATA_LEN = 36;
 
-  constructor(side: number, mLoc: UniformLoc, glw: GlWrapper) {
-    const data = genCubeVertices(side);
-    const buff = glw.loadData(data);
-    this.dataBuffer = buff;
+  private readonly mat: Mat4;
+  private readonly normalMat: Mat4;
+
+  private readonly dataBuffer: GlBuff;
+  private readonly normalBuffer: GlBuff;
+
+  constructor(side: number, glw: GlWrapper) {
+    this.dataBuffer = glw.loadData(genCubeVertices(side));
+    this.normalBuffer = glw.loadData(genCubeNormals());
 
     this.mat = Mat4.create();
-
-    this.matLoc = mLoc;
+    this.normalMat = Mat4.create();
   }
 
-  getBuff(): WebGLBuffer | null {
+  getVBuff(): GlBuff {
     return this.dataBuffer;
+  }
+
+  getNBuff(): GlBuff {
+    return this.normalBuffer;
+  }
+
+  getMatM(): Mat4 {
+    return this.mat;
+  }
+
+  getMatN(): Mat4 {
+    return this.normalMat;
   }
 
   mvRight(units: number): void {
@@ -52,9 +66,5 @@ export class CubeGeometry {
 
   rotateY(rad: number): void {
     this.mat.rotateY(rad);
-  }
-
-  update(glw: GlWrapper): void {
-    glw.uniformMat(this.matLoc, this.mat);
   }
 }

@@ -6,21 +6,25 @@ export type DataArray3D = TVec3[];
 export type DataArray = DataArray2D | DataArray3D;
 
 export enum GlAttrib {
-  POS = "vertex_position",
-  COLOR = "color",
+  POS = "attrib_position",
+  COLOR = "attrib_color",
+  NORMAL = "attrib_normal",
+  UV = "attrib_uv",
   V_COLOR = "v_color",
-  M_MAT = "u_model_matrix",
-  V_MAT = "u_view_matrix",
-  P_MAT = "u_projection_matrix",
+  MAT_MODEL = "u_model_mat",
+  MAT_VIEW = "u_view_mat",
+  MAT_PROJ = "u_proj_mat",
+  MAT_NORMAL = "u_normal_mat",
+  MAT_MVP = "u_mvp_mat",
   FRAG_POS = "v_frag_pos",
-  UV = "uv",
   V_UV = "v_uv",
+  V_BRIGHT = "v_brightness",
 }
 
 export type UniformLoc = WebGLUniformLocation | null;
+export type GlBuff = WebGLBuffer | null;
 
 export interface UniformLocations {
-  model_matrix: UniformLoc;
-  view_matrix: UniformLoc;
-  projection_matrix: UniformLoc;
+  mvp_matrix: UniformLoc;
+  normal_matrix: UniformLoc;
 }
