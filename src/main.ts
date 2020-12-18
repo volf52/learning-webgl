@@ -4,7 +4,7 @@ import { fShaderSrc, vShaderSrc } from "./shaders";
 import { GlAttrib } from "./types";
 import { Scene } from "./scene";
 import { CubeGeometry } from "./geometry";
-import brickData from "./textures/default_brick.png";
+import brickData from "./textures/invent-box-logo-512px.jpg";
 
 const main = async (): Promise<void> => {
   const initProgResult = initProg("glCanvas", {
@@ -16,10 +16,10 @@ const main = async (): Promise<void> => {
   const { canvas, glProg, gl, glw, uniformLocations } = initProgResult;
 
   // Load texture
-  const brick = glw.loadTexture(brickData);
+  const texture = glw.loadTexture(brickData);
   // Bind Texture
   gl.activeTexture(gl.TEXTURE0);
-  gl.bindTexture(gl.TEXTURE_2D, brick);
+  gl.bindTexture(gl.TEXTURE_2D, texture);
 
   //============== Data Loading ==========
   // Cube vertex and UV data
@@ -60,19 +60,29 @@ const main = async (): Promise<void> => {
     }
   });
 
-  const animate = (): void => {
+  const FRAME_PERIOD = 1000 / 40; // 30FPS
+  let lastTime: number;
+  const animate = (time: number): void => {
+    if (lastTime === undefined) lastTime = time;
+    const elapsed = time - lastTime;
+
     requestAnimationFrame(animate);
 
-    // Data updates
-    cubeObj.rotate(Math.PI / 60, Math.PI / 60);
+    if (elapsed > FRAME_PERIOD) {
+      lastTime = time - (elapsed % FRAME_PERIOD);
 
-    // Render Part
-    cubeObj.update(glw);
-    scene.update(glw, uniformLocations);
-    glw.drawTriangles(vertexData.length);
+      // Data updates
+      cubeObj.rotate(Math.PI / 60, Math.PI / 60);
+
+      // Render Part
+      cubeObj.update(glw);
+      scene.update(glw, uniformLocations);
+      glw.drawTriangles(vertexData.length);
+    }
   };
 
-  animate();
+  // animate();
+  requestAnimationFrame(animate);
 };
 
 // skipcq
