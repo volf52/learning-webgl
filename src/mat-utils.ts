@@ -174,8 +174,9 @@ export class Mat4 {
     return this.mat;
   }
 
-  set(matrix: mat4): void {
-    this.mat = matrix;
+  set(matrix: Mat4 | mat4): void {
+    if (matrix instanceof Mat4) this.mat = matrix.mat;
+    else this.mat = matrix;
   }
 
   translate(vec: ReadonlyVec3): Mat4 {
@@ -268,8 +269,14 @@ export class Mat4 {
     return this;
   }
 
-  invert(): Mat4 {
-    mat4.invert(this.mat, this.mat);
+  invert(toInvert?: Mat4): Mat4 {
+    let r: Mat4;
+
+    if (toInvert === undefined || toInvert === null) r = this;
+    else r = toInvert;
+
+    mat4.invert(this.mat, r.mat);
+
     return this;
   }
 
