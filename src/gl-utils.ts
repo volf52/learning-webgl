@@ -188,7 +188,7 @@ export class GlWrapper {
     });
 
     img.src = url;
-    document.body.appendChild(img); // sanity check
+    // document.body.appendChild(img); // sanity check
     return texture;
   }
 }

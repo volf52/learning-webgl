@@ -5,7 +5,7 @@ import { fShaderSrc, vShaderSrc } from "./shaders";
 import { GlAttrib } from "./types";
 import { Scene } from "./scene";
 import { CubeGeometry } from "./geometry";
-import textureData from "./textures/invent-box-logo-512px.jpg";
+import textureData from "./textures/meme.jpg";
 
 const main = async (): Promise<void> => {
   const initProgResult = initProg("glCanvas", {

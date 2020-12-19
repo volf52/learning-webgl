@@ -7,7 +7,7 @@
   "author": "Arslan <rslnkrmt2552@gmail.com>",
   "scripts": {
     "build": "parcel build ./src/index.html --no-cache --public-url ./",
-    "dev": "parcel serve ./src/index.html --open brave-browser --no-cache",
+    "dev": "parcel serve ./src/index.html --no-cache --open",
     "start": "npm run build && npm run dev",
     "clean": "rm -r .cache && rm -r dist"
   },
